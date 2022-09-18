@@ -1,5 +1,4 @@
 import pygame
-from random import randint
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE) # Sets the size of the screen
