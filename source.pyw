@@ -151,6 +151,34 @@ def manage_tasks(func): # A function to manage the tasks
         screen_title()
         display_tasks()
 
+def manage_tasks(): # A function to manage the tasks 
+    screen.fill(bg)
+    home_button()
+
+    #A title for the page
+    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
+    text = font.render('MANAGE TASKS', True, red)
+    text_rect = text.get_rect()
+    text_rect.center = (width / 2, 30)
+    screen.blit(text, text_rect)
+
+    def display_tasks():
+
+        def title(text, x, y): #A function that creates the title for each task
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = font.render(text, True, green)
+            text_rect = text.get_rect()
+            text_rect.center = (x, y)
+            screen.blit(text, text_rect)
+
+        def show_tasks(text, x, y): #Displays the info for the task
+            for task in tasks:
+                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
+                description = font.render(text, True, magenta)
+                description_rect = description.get_rect() 
+                description_rect.topleft = (x, y)
+                screen.blit(description, description_rect)
+
 def manage_schedule(): # A function that will delete a task
     screen.fill(bg)
     home_button()
@@ -352,6 +380,13 @@ while running:
                     start = False
                     running_schedule = True
 
+                    start = False
+                    running_tasks = True
+
+                elif manageSchedule_rect.collidepoint(mouse_pos):
+                    start = False
+                    running_schedule = True
+
             elif not start: #Makes the home button on every page but the home screen
                 if home_rect.collidepoint(mouse_pos):
                     start = True
@@ -361,6 +396,7 @@ while running:
     if start == True: home()
     elif running_schedule: manage_schedule()
     elif running_tasks: manage_tasks(func)
+    elif running_tasks: manage_tasks()
 
     date_time_label()
     pygame.display.flip()
