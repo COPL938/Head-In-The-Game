@@ -88,6 +88,69 @@ tasks = {
 } 
 
 
+def manage_tasks(func): # A function to manage the tasks 
+
+    def screen_title():#Creates a title for the page
+        font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
+        text = font.render('MANAGE TASKS', True, red)
+        text_rect = text.get_rect()
+        text_rect.center = (width / 2, 30)
+        screen.blit(text, text_rect)
+
+    def display_tasks():
+
+        def title(text, x, y): #A function that creates the title for each task
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = font.render(text, True, green)
+            title_rect = title.get_rect()
+            title_rect.center = (x, y)
+            screen.blit(title, title_rect)
+            global big_task_width
+            if title_rect.width > big_task_width: big_task_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+        def info(text, x, y): #Displays the info for the task
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
+            description = font.render(text, True, magenta)
+            description_rect = description.get_rect() 
+            description_rect.topleft = (x, y)
+            screen.blit(description, description_rect)
+            global big_task_width
+            if description_rect.width > big_task_width: big_task_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+        x = 150
+        y = 90
+        
+        global big_task_width
+        big_task_width = 0 #To Figure out the width of the widest text so the next column does not overlap.
+        columns = 1 #I only want 3 columns, this will stop a fourth from being created
+
+        for task in tasks:
+            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+                if columns == 3: return #I only want 2 columns, this will stop a third from being created
+                y = 90
+                x = x + big_task_width + 70 #For spacing
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+                
+            # Displays the taks and their information
+            title(tasks[task]['title'], x, y)
+            x += 10 #Indents the descriptions
+            y += 20 #Increasing the Y value moves the following description down so they're not overlapping 
+            info(tasks[task]['description'], x, y)
+            y += 15
+            info(tasks[task]['priority'], x, y)
+            y += 15
+            info(tasks[task]['date'], x, y)
+            y += 15
+            info(str(tasks[task]['completed']), x, y)
+            y += 25
+            x -= 10 #Unindents for the next title
+
+    screen.fill(bg)
+    home_button()
+    if func == 'home screen':
+        screen_title()
+        display_tasks()
+
 def manage_tasks(): # A function to manage the tasks 
     screen.fill(bg)
     home_button()
@@ -311,6 +374,14 @@ while running:
                 if manageTasks_rect.collidepoint(mouse_pos):
                     start = False
                     running_tasks = True
+                    func = 'home screen'
+
+                elif manageSchedule_rect.collidepoint(mouse_pos):
+                    start = False
+                    running_schedule = True
+
+                    start = False
+                    running_tasks = True
 
                 elif manageSchedule_rect.collidepoint(mouse_pos):
                     start = False
@@ -324,6 +395,7 @@ while running:
     
     if start == True: home()
     elif running_schedule: manage_schedule()
+    elif running_tasks: manage_tasks(func)
     elif running_tasks: manage_tasks()
 
     date_time_label()
