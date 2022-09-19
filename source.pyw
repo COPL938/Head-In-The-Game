@@ -43,6 +43,48 @@ tasks = {
         'date': '09/19/22',
         'completed': False
     },
+    'task4': {
+        'title': 'Task Four',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/17/22',
+        'completed': False
+    },
+    'task5': {
+        'title': 'Task Five',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/18/22',
+        'completed': False
+    },
+    'task6': {
+        'title': 'Task Six',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/19/22',
+        'completed': False
+    },
+    'task7': {
+        'title': 'Task Seven',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/17/22',
+        'completed': False
+    },
+    'task8': {
+        'title': 'Task Eight',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/18/22',
+        'completed': False
+    },
+    'task9': {
+        'title': 'Task Nine',
+        'description': 'A placeholder task.',
+        'priority' : 'Important',
+        'date': '09/19/22',
+        'completed': False
+    },
 } 
 
 
@@ -74,8 +116,6 @@ def manage_tasks(): # A function to manage the tasks
                 description_rect.topleft = (x, y)
                 screen.blit(description, description_rect)
 
-
-
 def manage_schedule(): # A function that will delete a task
     screen.fill(bg)
     home_button()
@@ -94,7 +134,7 @@ def home_button(): #Creates a home button that will be on every screen other tha
     font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
     home = font.render(' HOME ', True, black, cyan)
     home_rect = home.get_rect()
-    home_rect.topleft = (15, 65)
+    home_rect.topleft = (15, 70)
     screen.blit(home, home_rect)
 
 
@@ -115,12 +155,7 @@ def date_time_label():
 
 
 def home(): #Creates the home screen
-    screen.fill(bg)
-    running_schedule = False #Keeps the schedule and task functions from being run until it's the correct time.
-    running_tasks = False
-
-
-
+    
     def create_calendar(): #Creates the calendar at the bottom of the screen
         def set_nums(x, y, day): #Adds the numbers to the calendar
             day = str(day) 
@@ -161,7 +196,16 @@ def home(): #Creates the home screen
         def show_tasks(): #Displays the task list
             y = 90 # x and y coordinates for the tasks
             x = 1.5 * (width / 7)
+            big_task_width = 0 #To Figure out the width of the widest text so the next column does not overlap.
+            second_column = False #I only want 2 columns, this will stop a third from being created
+
             for task in tasks:
+                if y > 255: #If the list of tasks is longer than can fit in one column, start a second column
+                    if second_column: return #I only want 2 columns, this will stop a third from being created
+                    y = 90
+                    x = x + big_task_width + 15
+                    second_column = True #I only want 2 columns, this will stop a third from being created
+                    
                 # Displays the title and descrition of each task
                 title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
                 font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
@@ -171,6 +215,11 @@ def home(): #Creates the home screen
                 desc = title_font.render(tasks[task]['description'], True, magenta)
                 desc_rect = desc.get_rect() 
                 desc_rect.topleft = (x + 10, y + 15)
+                if title_rect.width > big_task_width: #Figures out the width of the widest text so the next column does not overlap.
+                    big_task_width = title_rect.width
+                if desc_rect.width > big_task_width + 10:
+                    big_task_width = desc_rect.width
+
                 screen.blit(title, title_rect)
                 screen.blit(desc, desc_rect)
                 y += 45
@@ -197,38 +246,40 @@ def home(): #Creates the home screen
         title()
 
 
-    def buttons(): #Creates the buttons at the right of the screen 
+    def buttons(): #Creates the buttons at the left of the screen 
         width = pygame.display.get_surface().get_width() # Gets the width of the screen
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
         buttons_list = ['', ' MANAGE TASKS ', ' MANAGE SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
         y = 2 * (250/len(buttons_list))
         biggest_width = 0 # Will hold the width of the widest button to maintain spacing with other objects.
 
-        global manageTasks_rect, manageSchedule_rect, editPriorities_rect, viewTask_rect #Making these variables global lets you see if the mouse is clicking them as buttons
+        global manageTasks_rect, manageSchedule_rect #Making these variables global lets you see if the mouse is clicking them as buttons
 
         # Button for adding a task
         manageTasks_text = font.render(buttons_list[1], True, black, cyan)
         manageTasks_rect = manageTasks_text.get_rect()
-        manageTasks_rect.top = (y)
-        manageTasks_rect.right = (width - 5)
+        manageTasks_rect.topleft = (5, y)
         screen.blit(manageTasks_text, manageTasks_rect)
         if manageTasks_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
             biggest_width = manageTasks_rect.width
         y += 250/len(buttons_list) #Moves the next button farther down
 
 
+
         # Button for deleting a task
         manageSchedule_text = font.render(buttons_list[2], True, black, cyan)
         manageSchedule_rect = manageSchedule_text.get_rect()
-        manageSchedule_rect.top = (y)
-        manageSchedule_rect.right = (width - 5)
+        manageSchedule_rect.topleft = (5, y)
         screen.blit(manageSchedule_text, manageSchedule_rect)
         if manageSchedule_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
             biggest_width = manageSchedule_rect.width
         y += 250/len(buttons_list) #Moves the next button farther down
 
 
-
+    screen.fill(bg)
+    global running_schedule, running_tasks
+    running_schedule = False #Keeps the schedule and task functions from being run until it's the correct time.
+    running_tasks = False
     create_calendar()
     buttons()
     list_tasks()
