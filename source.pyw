@@ -1,3 +1,4 @@
+from tkinter import Y
 import pygame
 from datetime import datetime
 
@@ -88,16 +89,45 @@ tasks = {
 } 
 
 
+def home_button(): #Creates a home button that will be on every screen other than the home button and shows the time and date.
+    global home_rect
+    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+    home = font.render(' HOME ', True, black, cyan)
+    home_rect = home.get_rect()
+    home_rect.topleft = (15, 70)
+    screen.blit(home, home_rect)
+
+def clear(): #Clears the screen then adds the home button. This function exists solely to make it that I don't have to use the same 2 lines tons of times.
+    screen.fill(bg)
+    home_button()
+
+def date_time_label(): #Shows the time and date
+    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+    ctime = datetime.now().strftime('%I:%M:%S %p') #These will display the time and date
+    if int(ctime[:2]) < 10: ctime = ctime.replace('0', '', 1) 
+    cdate = datetime.now().strftime('%A, %m/%d/%y')
+    time_text = font.render(ctime, True, yellow, bg)
+    time_rect = time_text.get_rect()
+    time_rect.topleft = (15, 15)
+    date_text = font.render(cdate, True, yellow, bg)
+    date_rect = date_text.get_rect()
+    date_rect.topleft = (15, 40)
+    
+    screen.blit(time_text, time_rect)
+    screen.blit(date_text, date_rect)
+
+
+
 def manage_tasks(func): # A function to manage the tasks 
 
-    def screen_title():#Creates a title for the page
+    def screen_title(text):#Creates a title for the page
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
-        text = font.render('MANAGE TASKS', True, red)
+        text = font.render(text, True, red)
         text_rect = text.get_rect()
         text_rect.center = (width / 2, 30)
         screen.blit(text, text_rect)
 
-    def display_tasks():
+    def display_tasks(): #Displays the tasks
 
         def title(text, x, y): #A function that creates the title for each task
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
@@ -145,43 +175,72 @@ def manage_tasks(func): # A function to manage the tasks
             y += 25
             x -= 10 #Unindents for the next title
 
-    screen.fill(bg)
-    home_button()
+    def tasks_buttons(): #Creates the buttons to manage tasks
+        global addTask_rect, editTask_rect, deleteTask_rect
+
+        font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+        biggest_width = 0
+        x = width - 15
+        y = (pygame.display.get_surface().get_height() / 2) / 3
+
+        #Button to add a task
+        addTask_text = font.render(' ADD TASK ', True, black, cyan)
+        addTask_rect = addTask_text.get_rect()
+        addTask_rect.topright = (x, y)
+        screen.blit(addTask_text, addTask_rect)
+        if addTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
+            biggest_width = addTask_rect.width
+        y += y #Moves the next button down
+
+
+        #Button to edit a task
+        editTask_text = font.render(' EDIT TASK ', True, black, cyan)
+        editTask_rect = editTask_text.get_rect()
+        editTask_rect.topright = (x, y)
+        screen.blit(editTask_text, editTask_rect)
+        if editTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
+            biggest_width = editTask_rect.width
+        y += y/2 #Moves the next button down. The y/2 is because y was doubled at the last button.
+
+
+        #Button to remove a task
+        deleteTask_text = font.render(' DELETE TASK ', True, black, cyan)
+        deleteTask_rect = deleteTask_text.get_rect()
+        deleteTask_rect.topright = (x, y)
+        screen.blit(deleteTask_text, deleteTask_rect)
+        if deleteTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
+            biggest_width = deleteTask_rect.width
+        y += y #Moves the next button down
+
+
+    def add_task():
+        clear()
+        screen_title('ADD A TASK')
+
+    def edit_task():
+        clear()
+        screen_title('EDIT A TASK')
+
+    def delete_task():
+        clear()
+        screen_title('DELETE A TASK')
+
+    clear()
     if func == 'home screen':
-        screen_title()
+        working['tasks']['main'] = True
+        screen_title('MANAGE TASKS')
         display_tasks()
+        tasks_buttons()
+    elif func == 'add task':
+        add_task()
+    elif func == 'edit task':
+        edit_task()
+    elif func == 'delete task':
+        delete_task()
 
-def manage_tasks(): # A function to manage the tasks 
-    screen.fill(bg)
-    home_button()
 
-    #A title for the page
-    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
-    text = font.render('MANAGE TASKS', True, red)
-    text_rect = text.get_rect()
-    text_rect.center = (width / 2, 30)
-    screen.blit(text, text_rect)
-
-    def display_tasks():
-
-        def title(text, x, y): #A function that creates the title for each task
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
-            title = font.render(text, True, green)
-            text_rect = text.get_rect()
-            text_rect.center = (x, y)
-            screen.blit(text, text_rect)
-
-        def show_tasks(text, x, y): #Displays the info for the task
-            for task in tasks:
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
-                description = font.render(text, True, magenta)
-                description_rect = description.get_rect() 
-                description_rect.topleft = (x, y)
-                screen.blit(description, description_rect)
-
-def manage_schedule(): # A function that will delete a task
-    screen.fill(bg)
-    home_button()
+def manage_schedule(func): # A function that will delete a task
+    clear()
 
     #Everything here is a placeholder
 
@@ -190,31 +249,6 @@ def manage_schedule(): # A function that will delete a task
     text_rect = text.get_rect()
     text_rect.center = (width / 2, 30)
     screen.blit(text, text_rect)
-
-
-def home_button(): #Creates a home button that will be on every screen other than the home button and shows the time and date.
-    global home_rect
-    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
-    home = font.render(' HOME ', True, black, cyan)
-    home_rect = home.get_rect()
-    home_rect.topleft = (15, 70)
-    screen.blit(home, home_rect)
-
-
-def date_time_label():
-    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
-    ctime = datetime.now().strftime('%I:%M:%S %p') #These will display the time and date
-    if int(ctime[:2]) < 10: ctime = ctime.replace('0', '', 1) 
-    cdate = datetime.now().strftime('%A, %m/%d/%y')
-    time_text = font.render(ctime, True, yellow, bg)
-    time_rect = time_text.get_rect()
-    time_rect.topleft = (15, 15)
-    date_text = font.render(cdate, True, yellow, bg)
-    date_rect = date_text.get_rect()
-    date_rect.topleft = (15, 40)
-    
-    screen.blit(time_text, time_rect)
-    screen.blit(date_text, date_rect)
 
 
 def home(): #Creates the home screen
@@ -310,7 +344,6 @@ def home(): #Creates the home screen
 
 
     def buttons(): #Creates the buttons at the left of the screen 
-        width = pygame.display.get_surface().get_width() # Gets the width of the screen
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
         buttons_list = ['', ' MANAGE TASKS ', ' MANAGE SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
         y = 2 * (250/len(buttons_list))
@@ -341,8 +374,8 @@ def home(): #Creates the home screen
 
     screen.fill(bg)
     global running_schedule, running_tasks
-    running_schedule = False #Keeps the schedule and task functions from being run until it's the correct time.
-    running_tasks = False
+    working['schedule']['running'] = False #Keeps the schedule and task functions from being run until it's the correct time.
+    working['tasks']['running'] = False
     create_calendar()
     buttons()
     list_tasks()
@@ -351,14 +384,29 @@ def home(): #Creates the home screen
 
 
     
-    
+global working
+# A dictionary to organize the many variables that keep everything running or not running.
+working = {
+    'home': {
+        'start': True
+    },
+    'schedule': {
+        'running': False,
+        'main': False #Keeps the schedule function from being run
+    },
+    'tasks': {
+        'running': False, #Keeps the tasks function from being run
+        'main': False, 
+        'adding_task': False, #Keeps the add_task function from being run
+        'deleting_task': False, #Keeps the delete_task function from being run
+        'editing_task': False #Keeps the edit_task function from being run
+    }
+}
+
+
+global width # A variable to keep the width of the window
 # The game loop
 running = True
-start = True #This will make the home screen show up
-global running_schedule, running_tasks
-running_schedule = False #Keeps the schedule and task functions from being run until it's the correct time.
-running_tasks = False
-global width # A variable to keep the width of the window
 while running:
     width = pygame.display.get_surface().get_width() #It is inside the loop so that it changes if the window is resized
 
@@ -370,33 +418,61 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             
-            if start: #makes the functions that will lead to the pages off the home screen
+            if working['home']['start']: #makes the functions that will lead to the pages off the home screen
                 if manageTasks_rect.collidepoint(mouse_pos):
-                    start = False
-                    running_tasks = True
+                    working['home']['start'] = False
+                    working['schedule']['running'] = False
+                    working['tasks']['running'] = True
                     func = 'home screen'
 
                 elif manageSchedule_rect.collidepoint(mouse_pos):
-                    start = False
-                    running_schedule = True
+                    working['home']['start'] = False
+                    working['tasks']['running'] = False
+                    working['schedule']['running'] = True
+                    func = ''
 
-                    start = False
-                    running_tasks = True
-
-                elif manageSchedule_rect.collidepoint(mouse_pos):
-                    start = False
-                    running_schedule = True
-
-            elif not start: #Makes the home button on every page but the home screen
+            elif not working['home']['start']: #Makes the home button on every page but the home screen
                 if home_rect.collidepoint(mouse_pos):
-                    start = True
+                    working['home']['start'] = True
                     home()
+
+            if working['schedule']['running']: 
+                # To handle the events in the schedule
+                pass
+
+            elif working['tasks']['running']:
+                # To hande the events in the tasks
+                if working['tasks']['main']:
+                    #Handles the events in the main page
+                    if addTask_rect.collidepoint(mouse_pos): #If the button to add a task is clicked
+                        #Makes sure that only the function to add a task runs.
+                        working['tasks']['main'] = False
+                        working['tasks']['editing_task'] = True
+                        working['tasks']['deleting_task'] = True
+                        working['tasks']['adding_task'] = True
+                        func = 'add task'
+                    
+                    elif editTask_rect.collidepoint(mouse_pos): #If the button to edit a task is clicked
+                        #Makes sure that only the function to add a task runs.
+                        working['tasks']['main'] = False
+                        working['tasks']['adding_task'] = True
+                        working['tasks']['deleting_task'] = True
+                        working['tasks']['editing_task'] = True
+                        func = 'edit task'
+
+                    elif deleteTask_rect.collidepoint(mouse_pos): #If the button to delete a task is clicked
+                        #Makes sure that only the function to add a task runs.
+                        working['tasks']['main'] = False
+                        working['tasks']['adding_task'] = True
+                        working['tasks']['editing_task'] = True
+                        working['tasks']['deleting_task'] = True
+                        func = 'delete task'
+
     
     
-    if start == True: home()
-    elif running_schedule: manage_schedule()
-    elif running_tasks: manage_tasks(func)
-    elif running_tasks: manage_tasks()
+    if working['home']['start']: home()
+    elif working['schedule']['running']: manage_schedule(func)
+    elif working['tasks']['running']: manage_tasks(func)
 
     date_time_label()
     pygame.display.flip()
