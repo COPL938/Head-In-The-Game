@@ -1,3 +1,4 @@
+from re import T
 import pygame
 from datetime import datetime
 from json import dump, load
@@ -24,27 +25,48 @@ yellow = (255, 255, 0)
 my_yellow = (241, 255, 148)
 my_purple = (158, 114, 196)
 
-# Tasks dictionary will hold the user's tasks and related info in nested dictionaries. Temp dictionary will hold whatever task the user is creating, editing or completing. task_num is the name of the new task nested dictionary.
-global tasks, temp, task_num, completing
-tasks = {}
-completing = '' #This will hold the name of the task that will be marked complete in the complete_task function
-#Add the contents of the task.json file to the tasks dictionary.
-with open('tasks.json') as file:
-    raw = load(file)
-tasks.update(raw)
-task_num = f'Task_{len(tasks) + 1}'
-temp = {
-    task_num: {
-        'title': '',
-        'description': '',
-        'priority': '',
-        'date': '',
-        'time to complete': ''
+
+# Housekeeping Functions
+def start_up(): #Create the temp and task dicts and the copleting variable
+    global tasks, temp, task_num, completing
+    completing = '' #This will hold the name of the task that will be marked complete in the complete_task function
+
+    # Tasks dictionary will hold the user's tasks and related info in nested dictionaries. 
+    tasks = {}
+
+    #Add the contents of the task.json file to the tasks dictionary.
+    with open('tasks.json') as file:
+        raw = load(file)
+    tasks.update(raw)
+    #Find the highest task number used so far
+    keys = list(tasks.keys())
+    print(keys)
+    num = 0 #Variable to find the highest task number used already
+    for key in keys:
+        key = key.split('_')
+        key_num = int(key[-1])
+        print(key_num)
+        if key_num > num:
+            num = key_num
+    num += 1 #The number that will be used is one higher than the highest task number still in use.
+    task_num = f'Task_{num}' #Holds the key for the nested dictionary in temp
+    print(task_num)
+    temp = {                #Temp dictionary will hold whatever task the user is creating, editing or completing.
+        task_num: {
+            'title': '',
+            'description': '',
+            'priority': '',
+            'date': '',
+            'time to complete': ''
+        }
     }
-}
+    print(temp)
 
-
-
+def shut_down(): #Save contents of the task dict to tasks.json file and delets the temp dict
+    global tasks, temp
+    with open('tasks.json', 'w') as file:
+        dump(tasks, file, indent=4)
+    del(temp) 
 
 def home_button(): #Creates a home button that will be on every screen other than the home button and shows the time and date.
     global home_rect
@@ -74,6 +96,7 @@ def date_time_label(): #Shows the time and date
     screen.blit(date_text, date_rect)
 
 
+# Work Functions
 def manage_tasks(task_func): # A function to manage the tasks 
 
     def screen_title(text):#Creates a title for the page
@@ -195,17 +218,17 @@ def manage_tasks(task_func): # A function to manage the tasks
             title_rect.topleft = (x, y)
             screen.blit(title, title_rect)
 
+        
         def done():
-            print('Task:')
-            print(temp)
-            print(tasks)
 
             tasks.update(temp)
-            #TODO Empty the contents of it
+            shut_down() #Saves everything to tasks.json file and deleted the temp and task dicts
+            start_up() #Recreates thet temp and task dicts and completed variable
+            #Those two need to be done so that multiple tasks can be added in one app session.
             working['tasks']['adding_task'] = False
             global func
             func = 'home screen'
-            
+
 
         def main(color_to_change):
             x = 500
@@ -327,6 +350,8 @@ def manage_tasks(task_func): # A function to manage the tasks
             global func
             func = 'home screen'
 
+            completing = ''
+
         def main(clicked):
 
             if clicked: color = active_black
@@ -422,7 +447,6 @@ def manage_schedule(func): # A function that will manage the schedule
     text_rect = text.get_rect()
     text_rect.center = (width / 2, 30)
     screen.blit(text, text_rect)
-
 
 def home(): #Creates the home screen
     
@@ -561,7 +585,7 @@ def home(): #Creates the home screen
 
 
 
-    
+# Game Processing
 global working
 # A dictionary to organize the many variables that keep everything running or not running.
 working = {
@@ -589,7 +613,9 @@ working = {
 
 
 global width, func # A variable to keep the width of the window and a variable to keep track of what nested function(s) should be running
+
 # The game loop
+start_up()
 running = True
 while running:
     width = pygame.display.get_surface().get_width() #It is inside the loop so that it changes if the window is resized
@@ -598,8 +624,7 @@ while running:
         #If the user hits the close button.
         if event.type == pygame.QUIT:
             running = False
-            with open('tasks.json', 'w') as file:
-                dump(tasks, file, indent=4)
+            shut_down()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:  
             mouse_pos = pygame.mouse.get_pos()
