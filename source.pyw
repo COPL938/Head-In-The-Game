@@ -24,10 +24,10 @@ yellow = (255, 255, 0)
 my_yellow = (241, 255, 148)
 my_purple = (158, 114, 196)
 
-# Tasks dictionary will hold the user's tasks and related info in nested dictionaries. Temp dictionary will hold whatever task the user is creating, editing or deleteing. task_num is the name of the new task nested dictionary.
-global tasks, temp, task_num
+# Tasks dictionary will hold the user's tasks and related info in nested dictionaries. Temp dictionary will hold whatever task the user is creating, editing or completing. task_num is the name of the new task nested dictionary.
+global tasks, temp, task_num, completing
 tasks = {}
-
+completing = '' #This will hold the name of the task that will be marked complete in the complete_task function
 #Add the contents of the task.json file to the tasks dictionary.
 with open('tasks.json') as file:
     raw = load(file)
@@ -74,7 +74,6 @@ def date_time_label(): #Shows the time and date
     screen.blit(date_text, date_rect)
 
 
-
 def manage_tasks(task_func): # A function to manage the tasks 
 
     def screen_title(text):#Creates a title for the page
@@ -84,13 +83,14 @@ def manage_tasks(task_func): # A function to manage the tasks
         text_rect.center = (width / 2, 30)
         screen.blit(text, text_rect)
 
-    def display_tasks(): #Displays the tasks
+    def display_tasks(complete): #Displays the tasks
 
         def title(text, x, y): #A function that creates the title for each task
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
             title = font.render(text, True, green)
             title_rect = title.get_rect()
-            title_rect.center = (x, y)
+            title_rect.centery = y
+            title_rect.left = x
             screen.blit(title, title_rect)
             global big_task_width
             if title_rect.width > big_task_width: big_task_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
@@ -111,7 +111,9 @@ def manage_tasks(task_func): # A function to manage the tasks
         big_task_width = 0 #To Figure out the width of the widest text so the next column does not overlap.
         columns = 1 #I only want 3 columns, this will stop a fourth from being created
 
+        count = 1 #To display the task numbers for the complete task function
         for task in tasks:
+            if task == 'completing': continue
             if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 3: return #I only want 2 columns, this will stop a third from being created
                 y = 90
@@ -119,7 +121,15 @@ def manage_tasks(task_func): # A function to manage the tasks
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 
             # Displays the taks and their information
-            title(tasks[task]['title'], x, y)
+            '''
+            print('\n\n')
+            print(tasks)
+            print(task)
+            print(tasks[task])
+            print('\n\n')
+            '''
+            if complete: title(f'Task #{count} - {tasks[task]["title"]}', x, y)
+            else: title(f'{tasks[task]["title"]}', x, y)
             x += 10 #Indents the descriptions
             y += 20 #Increasing the Y value moves the following description down so they're not overlapping 
             info(tasks[task]['description'], x, y)
@@ -132,8 +142,10 @@ def manage_tasks(task_func): # A function to manage the tasks
             y += 25
             x -= 10 #Unindents for the next title
 
+            count += 1 #To display task numbers for the complete_task function
+
     def tasks_buttons(): #Creates the buttons to manage tasks
-        global addTask_rect, editTask_rect, deleteTask_rect
+        global addTask_rect, editTask_rect, completeTask_rect
 
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
         biggest_width = 0
@@ -141,7 +153,7 @@ def manage_tasks(task_func): # A function to manage the tasks
         y = (pygame.display.get_surface().get_height() / 2) / 3
 
         #Button to add a task
-        addTask_text = font.render(' ADD TASK ', True, black, cyan)
+        addTask_text = font.render('  ADD A TASK  ', True, black, cyan)
         addTask_rect = addTask_text.get_rect()
         addTask_rect.topright = (x, y)
         screen.blit(addTask_text, addTask_rect)
@@ -151,7 +163,7 @@ def manage_tasks(task_func): # A function to manage the tasks
 
 
         #Button to edit a task
-        editTask_text = font.render(' EDIT TASK ', True, black, cyan)
+        editTask_text = font.render('  EDIT A TASK  ', True, black, cyan)
         editTask_rect = editTask_text.get_rect()
         editTask_rect.topright = (x, y)
         screen.blit(editTask_text, editTask_rect)
@@ -161,19 +173,19 @@ def manage_tasks(task_func): # A function to manage the tasks
 
 
         #Button to remove a task
-        deleteTask_text = font.render(' DELETE TASK ', True, black, cyan)
-        deleteTask_rect = deleteTask_text.get_rect()
-        deleteTask_rect.topright = (x, y)
-        screen.blit(deleteTask_text, deleteTask_rect)
-        if deleteTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
-            biggest_width = deleteTask_rect.width
+        completeTask_text = font.render(' COMPLETE TASK ', True, black, cyan)
+        completeTask_rect = completeTask_text.get_rect()
+        completeTask_rect.topright = (x, y)
+        screen.blit(completeTask_text, completeTask_rect)
+        if completeTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
+            biggest_width = completeTask_rect.width
         y += y #Moves the next button down
 
 
     def add_task(add_func):
         clear()
         screen_title('ADD A TASK')
-        display_tasks()
+        display_tasks(False)
 
 
         def display_prompt(text, x, y): #A function that creates the prompt for each input
@@ -187,6 +199,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             print('Task:')
             print(temp)
             print(tasks)
+
             tasks.update(temp)
             #TODO Empty the contents of it
             working['tasks']['adding_task'] = False
@@ -294,29 +307,112 @@ def manage_tasks(task_func): # A function to manage the tasks
         clear()
         screen_title('EDIT A TASK')
 
-    def delete_task():
+    def complete_task(complete_func):
         clear()
-        screen_title('DELETE A TASK')
+        screen_title('COMPLETE A TASK')
+        display_tasks(True)
+
+        def done():
+
+            global completing
+            completing = int(completing) - 1
+            keys = list(tasks.keys())
+            my_key = keys[completing]
+            #my_key = keys.index[completing]
+            #print('Key: ' + my_key)
+            #print(tasks[my_key])
+            del(tasks[my_key])
+
+            working['tasks']['completing_task'] = False
+            global func
+            func = 'home screen'
+
+        def main(clicked):
+
+            if clicked: color = active_black
+            else: color = black
+
+            x = 500 #To position the text box
+            y = 90
+
+            #Creates the prompt
+            prompt_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 25)
+            prompt = prompt_font.render('Which task would you like to mark completed?', True, my_purple)
+            prompt_rect = prompt.get_rect()
+            prompt_rect.topleft = (x, y)
+            screen.blit(prompt, prompt_rect)
+            y += 35 #Moves the instructions down
+
+            #For the prompt instructions
+            inst_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+            inst = inst_font.render('Please only type in the number.', True, my_purple)
+            inst_rect = inst.get_rect()
+            inst_rect.topleft = (x, y)
+            screen.blit(inst, inst_rect)
+            y += 30 #Moves the input down
+
+            #For the warning instructions
+            warning_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            warning = warning_font.render('This can not be undone.', True, red)
+            warning_rect = warning.get_rect()
+            warning_rect.topleft = (x, y)
+            screen.blit(warning, warning_rect)
+            y += 25 #Moves the input down
+
+            #For the input
+            input_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20) #For the inputs
+            global complete_backdrop    #Global so that the game loop can see if the mouse clicked it
+            user_input = input_font.render(completing, True, my_yellow) #Displays the input
+            complete_backdrop = pygame.draw.rect(screen, color, (x, y, 400, 30)) #Black backdrop
+            user_input_rect = user_input.get_rect()                              #Rect to hold the text
+            user_input_rect.topleft = (x+5, y+5)                                 #Centers the text in the backdrop
+            screen.blit(user_input, user_input_rect)                             #Puts the rects onto the screen
+            
+
+            #Buttons
+            global complete_done_button, complete_cancel_button
+            done_button_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+
+            #Done button
+            done_button = done_button_font.render('   DONE   ', True, black, cyan)
+            complete_done_button = done_button.get_rect()
+            complete_done_button.topright = (695, 215)
+            screen.blit(done_button, complete_done_button)
+
+            #Cancel Cutton
+            cancel_button = done_button_font.render(' CANCEL ', True, black, cyan)
+            complete_cancel_button = cancel_button.get_rect()
+            complete_cancel_button.topleft = (705, 215)
+            screen.blit(cancel_button, complete_cancel_button)
+
+        if 'active' in complete_func:
+            main(True)
+        elif 'done' in complete_func:
+            done()
+        else:
+            main(False)
+
+
 
     clear()
     if task_func == 'home screen':
         working['tasks']['main'] = True
         screen_title('MANAGE TASKS')
-        display_tasks()
+        display_tasks(False)
         tasks_buttons()
     elif 'add task' in task_func:
         add_task(task_func)
     elif 'edit task' in task_func:
         edit_task()
-    elif 'delete task' in task_func:
-        delete_task()
+    elif 'complete task' in task_func:
+        complete_task(task_func)
     else:
         working['tasks']['main'] = True
         screen_title('MANAGE TASKS')
-        display_tasks()
+        display_tasks(False)
         tasks_buttons()
 
-def manage_schedule(func): # A function that will delete a task
+def manage_schedule(func): # A function that will manage the schedule
     clear()
 
     #Everything here is a placeholder
@@ -374,6 +470,7 @@ def home(): #Creates the home screen
             second_column = False #I only want 2 columns, this will stop a third from being created
 
             for task in tasks:
+                if task == 'completing': continue
                 if y > 255: #If the list of tasks is longer than can fit in one column, start a second column
                     if second_column: return #I only want 2 columns, this will stop a third from being created
                     y = 90
@@ -484,7 +581,8 @@ working = {
         'adding_priority': False, #Controlling what key presses do
         'adding_date': False, #Controlling what key presses do
         'adding_time': False, #Controlling what key presses do
-        'deleting_task': False, #Keeps the delete_task function from being run
+        'completing_task': False, #Keeps the complete_task function from being run
+        'completing_task_editing': False, #Controlling what key presses do
         'editing_task': False #Keeps the edit_task function from being run
     }
 }
@@ -535,7 +633,7 @@ while running:
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
                         working['tasks']['editing_task'] = False
-                        working['tasks']['deleting_task'] = False
+                        working['tasks']['completing_task'] = False
                         working['tasks']['adding_task'] = True
                         func = 'add task'
                     
@@ -543,17 +641,17 @@ while running:
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
                         working['tasks']['adding_task'] = False
-                        working['tasks']['deleting_task'] = False
+                        working['tasks']['completing_task'] = False
                         working['tasks']['editing_task'] = True
                         func = 'edit task'
 
-                    elif deleteTask_rect.collidepoint(mouse_pos): #If the button to delete a task is clicked
+                    elif completeTask_rect.collidepoint(mouse_pos): #If the button to complete a task is clicked
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
                         working['tasks']['adding_task'] = False
                         working['tasks']['editing_task'] = False
-                        working['tasks']['deleting_task'] = True
-                        func = 'delete task'
+                        working['tasks']['completing_task_editing'] = True
+                        func = 'complete task'
 
                 elif working['tasks']['adding_task']:
                     if adding_title_backdrop.collidepoint(mouse_pos):  #Add to title
@@ -616,6 +714,10 @@ while running:
 
                         func = 'add task done'
 
+                    elif add_cancel_button.collidepoint(mouse_pos): #Cancel buttom
+                        func = 'home screen'
+                        working['tasks']['adding_task'] = False
+                    
                     else:
                         #So that the keys don't add to anything if the user clicks outside the rect
                         working['tasks']['adding_title'] = False
@@ -625,7 +727,24 @@ while running:
                         working['tasks']['adding_time'] = False
 
                         func = 'add task'
-            
+
+                elif working['tasks']['editing_task']:
+                    pass
+
+                elif working['tasks']['completing_task_editing']:
+                    if complete_backdrop.collidepoint(mouse_pos):  #Makes the box change color when clicked
+                        func = 'complete task active' #When the title text box is selected, this will tell it to change the color
+                    else:               #Changes the color of the box back to the original color
+                        func = 'complete task'
+                    if complete_done_button.collidepoint(mouse_pos): #Done button
+                        #Make the textboxes stop working
+                        working['tasks']['completing_task_editing'] = False 
+                        func = 'complete task done'
+
+                    elif complete_cancel_button.collidepoint(mouse_pos): #Cancel buttom
+                        func = 'home screen'
+                        working['tasks']['completing_task'] = False
+                    
 
         elif event.type == pygame.KEYDOWN:
             if working['tasks']['running']:
@@ -654,7 +773,11 @@ while running:
                         temp[task_num]['time to complete'] = temp[task_num]['time to complete'][:-1]
                     else:
                         temp[task_num]['time to complete'] += event.unicode
-
+                if working['tasks']['completing_task_editing']: #To complete a task
+                    if event.key == pygame.K_BACKSPACE:
+                        completing = completing[:-1]
+                    else:
+                        completing += event.unicode
 
 
     if working['home']['start']: home()
