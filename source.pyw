@@ -1,6 +1,7 @@
-from tkinter import Y
 import pygame
 from datetime import datetime
+from json import dump, load
+
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE) # Sets the size of the screen
@@ -15,78 +16,34 @@ bg = (43, 43, 43)
 cyan = (0, 255, 255)
 grey = (166, 166, 166)
 black = (0, 0, 0)
+active_black = (20, 20, 20)
 red = (255, 0, 0)
 green = (0, 255, 0)
 magenta = (255, 0, 255)
 yellow = (255, 255, 0)
+my_yellow = (241, 255, 148)
+my_purple = (158, 114, 196)
 
-# tasks dictionary will hold the user's tasks and related info in nested dictionaries
-global tasks
-tasks = {
-    'task1': {
-        'title': 'Task One',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/17/22',
-        'completed': False
-    },
-    'task2': {
-        'title': 'Task Two',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/18/22',
-        'completed': False
-    },
-    'task3': {
-        'title': 'Task Three',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/19/22',
-        'completed': False
-    },
-    'task4': {
-        'title': 'Task Four',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/17/22',
-        'completed': False
-    },
-    'task5': {
-        'title': 'Task Five',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/18/22',
-        'completed': False
-    },
-    'task6': {
-        'title': 'Task Six',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/19/22',
-        'completed': False
-    },
-    'task7': {
-        'title': 'Task Seven',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/17/22',
-        'completed': False
-    },
-    'task8': {
-        'title': 'Task Eight',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/18/22',
-        'completed': False
-    },
-    'task9': {
-        'title': 'Task Nine',
-        'description': 'A placeholder task.',
-        'priority' : 'Important',
-        'date': '09/19/22',
-        'completed': False
-    },
-} 
+# Tasks dictionary will hold the user's tasks and related info in nested dictionaries. Temp dictionary will hold whatever task the user is creating, editing or deleteing. task_num is the name of the new task nested dictionary.
+global tasks, temp, task_num
+tasks = {}
+
+#Add the contents of the task.json file to the tasks dictionary.
+with open('tasks.json') as file:
+    raw = load(file)
+tasks.update(raw)
+task_num = f'Task_{len(tasks) + 1}'
+temp = {
+    task_num: {
+        'title': '',
+        'description': '',
+        'priority': '',
+        'date': '',
+        'time to complete': ''
+    }
+}
+
+
 
 
 def home_button(): #Creates a home button that will be on every screen other than the home button and shows the time and date.
@@ -118,7 +75,7 @@ def date_time_label(): #Shows the time and date
 
 
 
-def manage_tasks(func): # A function to manage the tasks 
+def manage_tasks(task_func): # A function to manage the tasks 
 
     def screen_title(text):#Creates a title for the page
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
@@ -171,7 +128,7 @@ def manage_tasks(func): # A function to manage the tasks
             y += 15
             info(tasks[task]['date'], x, y)
             y += 15
-            info(str(tasks[task]['completed']), x, y)
+            info(str(tasks[task]['time to complete']), x, y)
             y += 25
             x -= 10 #Unindents for the next title
 
@@ -213,9 +170,125 @@ def manage_tasks(func): # A function to manage the tasks
         y += y #Moves the next button down
 
 
-    def add_task():
+    def add_task(add_func):
         clear()
         screen_title('ADD A TASK')
+        display_tasks()
+
+
+        def display_prompt(text, x, y): #A function that creates the prompt for each input
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 25)
+            title = font.render(text, True, my_purple)
+            title_rect = title.get_rect()
+            title_rect.topleft = (x, y)
+            screen.blit(title, title_rect)
+
+        def done():
+            print('Task:')
+            print(temp)
+            print(tasks)
+            tasks.update(temp)
+            #TODO Empty the contents of it
+            working['tasks']['adding_task'] = False
+            global func
+            func = 'home screen'
+            
+
+        def main(color_to_change):
+            x = 500
+            y = 90
+            
+            input_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20) #For the inputs
+
+
+            #Rects need to be global so they can be acessed in the game loop
+            global adding_title_backdrop, adding_desc_backdrop, adding_priority_backdrop, adding_date_backdrop, adding_time_backdrop
+            #input strings
+            
+            #change the color of the textbox when it's selected
+            title_color = desc_color = priority_color = date_color = time_color = black
+            if color_to_change == 'title': title_color = active_black
+            elif color_to_change == 'desc': desc_color = active_black
+            elif color_to_change == 'priority': priority_color = active_black
+            elif color_to_change == 'date': date_color = active_black
+            elif color_to_change == 'time': time_color = active_black
+
+
+            # Title                                                                    Create the prompts and rectangles for inputs
+            display_prompt('Title', x, y)                                              #Displays the text
+            y += 35                                                                    #Moves the next box down
+            title = input_font.render(temp[task_num]['title'], True, my_yellow)                     #Renders the text
+            adding_title_backdrop = pygame.draw.rect(screen, title_color, (x, y, 400, 30))     #Creates the rect for the text
+            adding_title_rect = title.get_rect()                                               #Creates a rect for the text
+            adding_title_rect.topleft = (x+5, y+5)                                                 #Moves the rect to the right coordinates
+            screen.blit(title, adding_title_rect)                                              #Moves them onto the screen
+            y += 40
+
+            #Description
+            display_prompt('Description', x, y)
+            y += 35
+            desc = input_font.render(temp[task_num]['description'], True, my_yellow)
+            adding_desc_backdrop = pygame.draw.rect(screen, desc_color, (x, y, 400, 30))
+            adding_desc_rect = desc.get_rect()
+            adding_desc_rect.topleft = (x+5, y+5)  
+            screen.blit(desc, adding_desc_rect)      
+            y += 40
+
+            #Priority
+            display_prompt('Priority', x, y)
+            y += 35
+            priority = input_font.render(temp[task_num]['priority'], True, my_yellow)
+            adding_priority_backdrop = pygame.draw.rect(screen, priority_color, (x, y, 400, 30))
+            adding_priority_rect = priority.get_rect()
+            adding_priority_rect.topleft = (x+5, y+5)
+            screen.blit(priority, adding_priority_rect)        
+            y += 40
+            #TODO PRIORITY DROPDOWN
+
+            #Due date
+            display_prompt('Due Date (mm/dd/yy', x, y)
+            y += 35
+            date = input_font.render(temp[task_num]['date'], True, my_yellow)
+            adding_date_backdrop = pygame.draw.rect(screen, date_color, (x, y, 400, 30))
+            adding_date_rect = date.get_rect()
+            adding_date_rect.topleft = (x+5, y+5)
+            screen.blit(date, adding_date_rect)
+            y += 40
+
+            #Time
+            display_prompt('How long will it take to complete? (min)', x, y)
+            y += 35
+            time = input_font.render(temp[task_num]['time to complete'], True, my_yellow)
+            adding_time_backdrop = pygame.draw.rect(screen, time_color, (x, y, 400, 30))
+            adding_time_rect = time.get_rect()
+            adding_time_rect.topleft = (x+5, y+5)
+            screen.blit(time, adding_time_rect)
+
+
+            #Buttons
+            global add_done_button, add_cancel_button
+            done_button_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+            #Done button
+            done_button = done_button_font.render('   DONE   ', True, black, cyan)
+            add_done_button = done_button.get_rect()
+            add_done_button.topright = (695, 470)
+            screen.blit(done_button, add_done_button)
+
+            #Cancel Cutton
+            cancel_button = done_button_font.render(' CANCEL ', True, black, cyan)
+            add_cancel_button = cancel_button.get_rect()
+            add_cancel_button.topleft = (705, 470)
+            screen.blit(cancel_button, add_cancel_button)
+
+        if 'done' in add_func:
+            done()
+        else:
+            if 'title' in add_func: main('title')
+            elif 'desc' in add_func: main('desc')
+            elif 'priority' in add_func: main('priority')
+            elif 'date' in add_func: main('date')
+            elif 'time' in add_func: main('time')
+            else: main('')
 
     def edit_task():
         clear()
@@ -226,18 +299,22 @@ def manage_tasks(func): # A function to manage the tasks
         screen_title('DELETE A TASK')
 
     clear()
-    if func == 'home screen':
+    if task_func == 'home screen':
         working['tasks']['main'] = True
         screen_title('MANAGE TASKS')
         display_tasks()
         tasks_buttons()
-    elif func == 'add task':
-        add_task()
-    elif func == 'edit task':
+    elif 'add task' in task_func:
+        add_task(task_func)
+    elif 'edit task' in task_func:
         edit_task()
-    elif func == 'delete task':
+    elif 'delete task' in task_func:
         delete_task()
-
+    else:
+        working['tasks']['main'] = True
+        screen_title('MANAGE TASKS')
+        display_tasks()
+        tasks_buttons()
 
 def manage_schedule(func): # A function that will delete a task
     clear()
@@ -343,6 +420,8 @@ def home(): #Creates the home screen
         title()
 
 
+
+
     def buttons(): #Creates the buttons at the left of the screen 
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
         buttons_list = ['', ' MANAGE TASKS ', ' MANAGE SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
@@ -372,6 +451,8 @@ def home(): #Creates the home screen
         y += 250/len(buttons_list) #Moves the next button farther down
 
 
+
+
     screen.fill(bg)
     global running_schedule, running_tasks
     working['schedule']['running'] = False #Keeps the schedule and task functions from being run until it's the correct time.
@@ -398,13 +479,18 @@ working = {
         'running': False, #Keeps the tasks function from being run
         'main': False, 
         'adding_task': False, #Keeps the add_task function from being run
+        'adding_title': False, #Controlling what key presses do
+        'adding_desc': False, #Controlling what key presses do
+        'adding_priority': False, #Controlling what key presses do
+        'adding_date': False, #Controlling what key presses do
+        'adding_time': False, #Controlling what key presses do
         'deleting_task': False, #Keeps the delete_task function from being run
         'editing_task': False #Keeps the edit_task function from being run
     }
 }
 
 
-global width # A variable to keep the width of the window
+global width, func # A variable to keep the width of the window and a variable to keep track of what nested function(s) should be running
 # The game loop
 running = True
 while running:
@@ -414,8 +500,10 @@ while running:
         #If the user hits the close button.
         if event.type == pygame.QUIT:
             running = False
+            with open('tasks.json', 'w') as file:
+                dump(tasks, file, indent=4)
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN:  
             mouse_pos = pygame.mouse.get_pos()
             
             if working['home']['start']: #makes the functions that will lead to the pages off the home screen
@@ -435,41 +523,140 @@ while running:
                 if home_rect.collidepoint(mouse_pos):
                     working['home']['start'] = True
                     home()
+                
 
-            if working['schedule']['running']: 
-                # To handle the events in the schedule
+            if working['schedule']['running']:  # To handle the events in the schedule
                 pass
 
-            elif working['tasks']['running']:
-                # To hande the events in the tasks
+            elif working['tasks']['running']: # To hande the events in the tasks
                 if working['tasks']['main']:
                     #Handles the events in the main page
                     if addTask_rect.collidepoint(mouse_pos): #If the button to add a task is clicked
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
-                        working['tasks']['editing_task'] = True
-                        working['tasks']['deleting_task'] = True
+                        working['tasks']['editing_task'] = False
+                        working['tasks']['deleting_task'] = False
                         working['tasks']['adding_task'] = True
                         func = 'add task'
                     
                     elif editTask_rect.collidepoint(mouse_pos): #If the button to edit a task is clicked
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
-                        working['tasks']['adding_task'] = True
-                        working['tasks']['deleting_task'] = True
+                        working['tasks']['adding_task'] = False
+                        working['tasks']['deleting_task'] = False
                         working['tasks']['editing_task'] = True
                         func = 'edit task'
 
                     elif deleteTask_rect.collidepoint(mouse_pos): #If the button to delete a task is clicked
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
-                        working['tasks']['adding_task'] = True
-                        working['tasks']['editing_task'] = True
+                        working['tasks']['adding_task'] = False
+                        working['tasks']['editing_task'] = False
                         working['tasks']['deleting_task'] = True
                         func = 'delete task'
 
-    
-    
+                elif working['tasks']['adding_task']:
+                    if adding_title_backdrop.collidepoint(mouse_pos):  #Add to title
+                        #So that the keys being pressed only add to the title
+                        working['tasks']['adding_title'] = True
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = False
+
+                        func = 'add task title' #When the title text box is selected, this will tell it to change the color
+                    
+                    elif adding_desc_backdrop.collidepoint(mouse_pos):  #Adding to description
+                        #So that the keys being pressed only add to the description
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = True
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = False
+
+                        func = 'add task desc' #When the description text box is selected, this will tell it to change the color
+                    
+                    elif adding_priority_backdrop.collidepoint(mouse_pos): #Adding to priority
+                        #So that the keys being pressed only add to the priority
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = True
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = False
+
+                        func = 'add task priority' #When the priority text box is selected, this will tell it to change the color
+
+                    elif adding_date_backdrop.collidepoint(mouse_pos):  #Adding to the date
+                        #So that the keys only add to the date
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = True
+                        working['tasks']['adding_time'] = False
+
+                        func = 'add task date' #When the date text box is selected, this will tell it to change the color
+
+                    elif adding_time_backdrop.collidepoint(mouse_pos): #Adding to the time
+                        #So that the keys only add to the time
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = True
+
+                        func = 'add task time' #When the time text box is selected, this will tell it to change the color
+                    
+                    elif add_done_button.collidepoint(mouse_pos): #Done button
+                        #Make the textboxes stop working
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = False 
+
+                        func = 'add task done'
+
+                    else:
+                        #So that the keys don't add to anything if the user clicks outside the rect
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_time'] = False
+
+                        func = 'add task'
+            
+
+        elif event.type == pygame.KEYDOWN:
+            if working['tasks']['running']:
+                if working['tasks']['adding_title']:   #For the title
+                    if event.key == pygame.K_BACKSPACE:  #Process backspace - the following lines are the same
+                        temp[task_num]['title'] = temp[task_num]['title'][:-1]
+                    else:                               #Process key presses - the following lines are the same
+                        temp[task_num]['title'] += event.unicode
+                if working['tasks']['adding_desc']:
+                    if event.key == pygame.K_BACKSPACE: #For the description
+                        temp[task_num]['description'] = temp[task_num]['description'][:-1]
+                    else:
+                        temp[task_num]['description'] += event.unicode
+                if working['tasks']['adding_priority']: #For the priority
+                    if event.key == pygame.K_BACKSPACE:
+                        temp[task_num]['priority'] = temp[task_num]['priority'][:-1]
+                    else:
+                        temp[task_num]['priority'] += event.unicode
+                if working['tasks']['adding_date']:   #For the date
+                    if event.key == pygame.K_BACKSPACE:
+                        temp[task_num]['date'] = temp[task_num]['date'][:-1]
+                    else:
+                        temp[task_num]['date'] += event.unicode
+                if working['tasks']['adding_time']:  #For the time
+                    if event.key == pygame.K_BACKSPACE:
+                        temp[task_num]['time to complete'] = temp[task_num]['time to complete'][:-1]
+                    else:
+                        temp[task_num]['time to complete'] += event.unicode
+
+
+
     if working['home']['start']: home()
     elif working['schedule']['running']: manage_schedule(func)
     elif working['tasks']['running']: manage_tasks(func)
