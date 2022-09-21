@@ -1,9 +1,16 @@
 {
     "Task_1": {
         "title": "Hello World",
-        "description": "A simple task to test the program",
+        "description": "A simple task to test the program.",
+        "priority": "Medium",
+        "date": "09/21/22",
+        "time to complete": "1"
+    },
+    "Task_2": {
+        "title": "Congressional App Challenge",
+        "description": "Finish the Head In The Game app for the CAC",
         "priority": "High",
-        "date": "09/26/22",
-        "time to complete": "30"
+        "date": "11/01/22",
+        "time to complete": "60480"
     }
 }
