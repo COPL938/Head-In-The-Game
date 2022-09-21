@@ -1,4 +1,3 @@
-from re import T
 import pygame
 from datetime import datetime
 from json import dump, load
@@ -51,7 +50,7 @@ def start_up(): #Create the temp and task dicts and the copleting variable
     num += 1 #The number that will be used is one higher than the highest task number still in use.
     task_num = f'Task_{num}' #Holds the key for the nested dictionary in temp
     print(task_num)
-    temp = {                #Temp dictionary will hold whatever task the user is creating, editing or completing.
+    temp = {                #Temp dictionary will hold whatever task the user is creating or completing.
         task_num: {
             'title': '',
             'description': '',
@@ -168,7 +167,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             count += 1 #To display task numbers for the complete_task function
 
     def tasks_buttons(): #Creates the buttons to manage tasks
-        global addTask_rect, editTask_rect, completeTask_rect
+        global addTask_rect, completeTask_rect
 
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
         biggest_width = 0
@@ -183,16 +182,6 @@ def manage_tasks(task_func): # A function to manage the tasks
         if addTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
             biggest_width = addTask_rect.width
         y += y #Moves the next button down
-
-
-        #Button to edit a task
-        editTask_text = font.render('  EDIT A TASK  ', True, black, cyan)
-        editTask_rect = editTask_text.get_rect()
-        editTask_rect.topright = (x, y)
-        screen.blit(editTask_text, editTask_rect)
-        if editTask_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
-            biggest_width = editTask_rect.width
-        y += y/2 #Moves the next button down. The y/2 is because y was doubled at the last button.
 
 
         #Button to remove a task
@@ -326,9 +315,6 @@ def manage_tasks(task_func): # A function to manage the tasks
             elif 'time' in add_func: main('time')
             else: main('')
 
-    def edit_task():
-        clear()
-        screen_title('EDIT A TASK')
 
     def complete_task(complete_func):
         clear()
@@ -427,8 +413,6 @@ def manage_tasks(task_func): # A function to manage the tasks
         tasks_buttons()
     elif 'add task' in task_func:
         add_task(task_func)
-    elif 'edit task' in task_func:
-        edit_task()
     elif 'complete task' in task_func:
         complete_task(task_func)
     else:
@@ -607,7 +591,6 @@ working = {
         'adding_time': False, #Controlling what key presses do
         'completing_task': False, #Keeps the complete_task function from being run
         'completing_task_editing': False, #Controlling what key presses do
-        'editing_task': False #Keeps the edit_task function from being run
     }
 }
 
@@ -662,19 +645,10 @@ while running:
                         working['tasks']['adding_task'] = True
                         func = 'add task'
                     
-                    elif editTask_rect.collidepoint(mouse_pos): #If the button to edit a task is clicked
-                        #Makes sure that only the function to add a task runs.
-                        working['tasks']['main'] = False
-                        working['tasks']['adding_task'] = False
-                        working['tasks']['completing_task'] = False
-                        working['tasks']['editing_task'] = True
-                        func = 'edit task'
-
                     elif completeTask_rect.collidepoint(mouse_pos): #If the button to complete a task is clicked
                         #Makes sure that only the function to add a task runs.
                         working['tasks']['main'] = False
                         working['tasks']['adding_task'] = False
-                        working['tasks']['editing_task'] = False
                         working['tasks']['completing_task_editing'] = True
                         func = 'complete task'
 
@@ -753,8 +727,6 @@ while running:
 
                         func = 'add task'
 
-                elif working['tasks']['editing_task']:
-                    pass
 
                 elif working['tasks']['completing_task_editing']:
                     if complete_backdrop.collidepoint(mouse_pos):  #Makes the box change color when clicked
