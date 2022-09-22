@@ -47,6 +47,7 @@ def start_up(): #Create the temp and task dicts and the copleting variable
             num = key_num
     num += 1 #The number that will be used is one higher than the highest task number still in use.
     task_num = f'Task_{num}' #Holds the key for the nested dictionary in temp
+
     temp = {                #Temp dictionary will hold whatever task the user is creating or completing.
         task_num: {
             'title': '',
