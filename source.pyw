@@ -39,17 +39,15 @@ def start_up(): #Create the temp and task dicts and the copleting variable
     tasks.update(raw)
     #Find the highest task number used so far
     keys = list(tasks.keys())
-    print(keys)
     num = 0 #Variable to find the highest task number used already
     for key in keys:
         key = key.split('_')
         key_num = int(key[-1])
-        print(key_num)
         if key_num > num:
             num = key_num
     num += 1 #The number that will be used is one higher than the highest task number still in use.
     task_num = f'Task_{num}' #Holds the key for the nested dictionary in temp
-    print(task_num)
+
     temp = {                #Temp dictionary will hold whatever task the user is creating or completing.
         task_num: {
             'title': '',
@@ -59,7 +57,6 @@ def start_up(): #Create the temp and task dicts and the copleting variable
             'time to complete': ''
         }
     }
-    print(temp)
 
 def shut_down(): #Save contents of the task dict to tasks.json file and delets the temp dict
     global tasks, temp
@@ -139,17 +136,10 @@ def manage_tasks(task_func): # A function to manage the tasks
             if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 3: return #I only want 2 columns, this will stop a third from being created
                 y = 90
-                x = x + big_task_width + 70 #For spacing
+                x = x + big_task_width + 50 #For spacing
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 
             # Displays the taks and their information
-            '''
-            print('\n\n')
-            print(tasks)
-            print(task)
-            print(tasks[task])
-            print('\n\n')
-            '''
             if complete: title(f'Task #{count} - {tasks[task]["title"]}', x, y)
             else: title(f'{tasks[task]["title"]}', x, y)
             x += 10 #Indents the descriptions
@@ -202,7 +192,7 @@ def manage_tasks(task_func): # A function to manage the tasks
 
         def display_prompt(text, x, y): #A function that creates the prompt for each input
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 25)
-            title = font.render(text, True, my_purple)
+            title = font.render(text, True, my_purple, bg)
             title_rect = title.get_rect()
             title_rect.topleft = (x, y)
             screen.blit(title, title_rect)
@@ -240,7 +230,7 @@ def manage_tasks(task_func): # A function to manage the tasks
 
 
             # Title                                                                    Create the prompts and rectangles for inputs
-            display_prompt('Title', x, y)                                              #Displays the text
+            display_prompt('Title       ', x, y)  #The whitespace is to everwrite ant task info that is too long
             y += 35                                                                    #Moves the next box down
             title = input_font.render(temp[task_num]['title'], True, my_yellow)                     #Renders the text
             adding_title_backdrop = pygame.draw.rect(screen, title_color, (x, y, 400, 30))     #Creates the rect for the text
@@ -250,7 +240,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             y += 40
 
             #Description
-            display_prompt('Description', x, y)
+            display_prompt('Description                ', x, y)
             y += 35
             desc = input_font.render(temp[task_num]['description'], True, my_yellow)
             adding_desc_backdrop = pygame.draw.rect(screen, desc_color, (x, y, 400, 30))
@@ -260,7 +250,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             y += 40
 
             #Priority
-            display_prompt('Priority', x, y)
+            display_prompt('Priority (high/medium/low)        ', x, y)
             y += 35
             priority = input_font.render(temp[task_num]['priority'], True, my_yellow)
             adding_priority_backdrop = pygame.draw.rect(screen, priority_color, (x, y, 400, 30))
@@ -271,7 +261,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             #TODO PRIORITY DROPDOWN
 
             #Due date
-            display_prompt('Due Date (mm/dd/yy', x, y)
+            display_prompt('Due Date (mm/dd/yy)     ', x, y)
             y += 35
             date = input_font.render(temp[task_num]['date'], True, my_yellow)
             adding_date_backdrop = pygame.draw.rect(screen, date_color, (x, y, 400, 30))
@@ -327,9 +317,6 @@ def manage_tasks(task_func): # A function to manage the tasks
             completing = int(completing) - 1
             keys = list(tasks.keys())
             my_key = keys[completing]
-            #my_key = keys.index[completing]
-            #print('Key: ' + my_key)
-            #print(tasks[my_key])
             del(tasks[my_key])
 
             working['tasks']['completing_task'] = False
@@ -421,16 +408,211 @@ def manage_tasks(task_func): # A function to manage the tasks
         display_tasks(False)
         tasks_buttons()
 
-def manage_schedule(func): # A function that will manage the schedule
+def view_schedule(schedule_func): # A function that will show the entire schedule
     clear()
 
     #Everything here is a placeholder
+    def screen_title():
+        font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
+        text = font.render('VIEW SCHEDULE', True, red)
+        text_rect = text.get_rect()
+        text_rect.center = (width / 2, 30)
+        screen.blit(text, text_rect)
 
-    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
-    text = font.render('MANAGE SCHEDULE', True, red)
-    text_rect = text.get_rect()
-    text_rect.center = (width / 2, 30)
-    screen.blit(text, text_rect)
+    def sort_tasks(): #Sorts the tasks into the apropriate lists.
+        #Lists to hold the sorted tasks
+        overdue = [] 
+        high = []
+        med = []
+        low = []
+        today = datetime.now() #Gets today's date for the calcualtions. It is outside the loop because there is no need to have it re-run many times.
+        for task in tasks:
+            date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
+            diff = today - date #Gets the difference between today's date and the date of the task. 
+            if diff.days > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
+                overdue.append(task)
+            elif 'high' in tasks[task]['priority'].lower(): #If the priority is high, add it to the high list
+                high.append(task)
+            elif 'med' in tasks[task]['priority'].lower(): #If the priority is medium, add it to the med list
+                med.append(task)
+            elif 'low' in tasks[task]['priority'].lower():  #If the priority is low, add it to the low list
+                low.append(task)
+            else:        #If the priority is anything else (i.e. the user screwed it up), add it to the low list.
+                low.append(task)
+
+        return overdue, high, med, low
+
+    def main():
+        overdue, high, med, low = sort_tasks()
+        big_schedule_width = 0
+
+        x = 25
+        y = 115
+
+        columns = 1 #I only want 4 columns, this will stop a fourth from being created
+        count = 1 #To display the task numbers for the complete task function
+            
+        for task in overdue:
+            #Manages columns
+            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+                if columns == 4: return #I only want 3 columns, this will stop a third from being created
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+                y = 115
+                if columns == 4: big_schedule_width *= 2
+                x = big_schedule_width + 30 #For spacing
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+
+
+            #adds the title for the overdue task in red
+            title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = title_font.render(tasks[task]['title'], True, red)
+            title_rect = title.get_rect()
+            title_rect.centery = y
+            title_rect.left = x
+            screen.blit(title, title_rect)
+    
+            if title_rect.width > big_schedule_width: big_schedule_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+            y += 15
+            x += 10
+
+            #overdue task info in yellow
+            for item in tasks[task]:
+                #if item == 'title': continue #Skip the title
+                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                description = font.render(tasks[task][item], True, magenta)
+                description_rect = description.get_rect() 
+                description_rect.topleft = (x, y)
+                screen.blit(description, description_rect)
+                if description_rect.width > big_schedule_width: big_schedule_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+                y += 17
+
+            x -= 10
+            y += 20
+
+
+        for task in high:
+            #Manages columns
+            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+                if columns == 4: return #I only want 3 columns, this will stop a third from being created
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+                y = 115
+                if columns == 4: big_schedule_width *= 2
+                x = big_schedule_width + 30 #For spacing
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+
+
+            #adds the title for the overdue task in red
+            title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = title_font.render(tasks[task]['title'], True, green)
+            title_rect = title.get_rect()
+            title_rect.centery = y
+            title_rect.left = x
+            screen.blit(title, title_rect)
+    
+            if title_rect.width > big_schedule_width: big_schedule_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+            y += 15
+            x += 10
+
+            #overdue task info in yellow
+            for item in tasks[task]:
+                #if item == 'title': continue #Skip the title
+                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                description = font.render(tasks[task][item], True, magenta)
+                description_rect = description.get_rect() 
+                description_rect.topleft = (x, y)
+                screen.blit(description, description_rect)
+                if description_rect.width > big_schedule_width: big_schedule_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+                y += 17
+
+            x -= 10
+            y += 20
+
+            
+        for task in med:
+            #Manages columns
+            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+                if columns == 4: return #I only want 3 columns, this will stop a third from being created
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+                y = 115
+                if columns == 4: big_schedule_width *= 2
+                x = big_schedule_width + 30 #For spacing
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+
+
+            #adds the title for the overdue task in red
+            title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = title_font.render(tasks[task]['title'], True, green)
+            title_rect = title.get_rect()
+            title_rect.centery = y
+            title_rect.left = x
+            screen.blit(title, title_rect)
+    
+            if title_rect.width > big_schedule_width: big_schedule_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+            y += 15
+            x += 10
+
+            #overdue task info in yellow
+            for item in tasks[task]:
+                #if item == 'title': continue #Skip the title
+                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                description = font.render(tasks[task][item], True, magenta)
+                description_rect = description.get_rect() 
+                description_rect.topleft = (x, y)
+                screen.blit(description, description_rect)
+                if description_rect.width > big_schedule_width: big_schedule_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+                y += 17
+
+            x -= 10
+            y += 20
+
+
+        for task in low:
+            #Manages columns
+            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+                if columns == 4: return #I only want 3 columns, this will stop a third from being created
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+                y = 115
+                if columns == 4: big_schedule_width *= 2
+                x = big_schedule_width + 30 #For spacing
+                columns += 1 #I only want 3 columns, this will stop a fourth from being created
+
+
+            #adds the title for the overdue task in red
+            title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = title_font.render(tasks[task]['title'], True, green)
+            title_rect = title.get_rect()
+            title_rect.centery = y
+            title_rect.left = x
+            screen.blit(title, title_rect)
+    
+            if title_rect.width > big_schedule_width: big_schedule_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+            y += 15
+            x += 10
+
+            #overdue task info in yellow
+            for item in tasks[task]:
+                #if item == 'title': continue #Skip the title
+                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                description = font.render(tasks[task][item], True, magenta)
+                description_rect = description.get_rect() 
+                description_rect.topleft = (x, y)
+                screen.blit(description, description_rect)
+                if description_rect.width > big_schedule_width: big_schedule_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
+
+                y += 17
+
+            x -= 10
+            y += 20
+
+
+
+
+    if schedule_func == 'home screen':
+        screen_title()
+        main()
 
 def home(): #Creates the home screen
     
@@ -480,14 +662,10 @@ def home(): #Creates the home screen
             for task in tasks:
                 if task == 'completing': continue
                 if y > 255: #If the list of tasks is longer than can fit in one column, start a second column
-                    if second_column: return #I only want 2 columns, this will stop a third from being created
-                    y = 90
-                    x = x + big_task_width + 15
-                    second_column = True #I only want 2 columns, this will stop a third from being created
+                    return
                     
                 # Displays the title and descrition of each task
                 title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
                 title = title_font.render(tasks[task]['title'], True, green)
                 title_rect = title.get_rect() 
                 title_rect.topleft = (x, y)
@@ -501,7 +679,7 @@ def home(): #Creates the home screen
 
                 screen.blit(title, title_rect)
                 screen.blit(desc, desc_rect)
-                y += 45
+                y += 40
 
         title()
         show_tasks()
@@ -520,20 +698,104 @@ def home(): #Creates the home screen
             text_rect.center = (x, 30)
             screen.blit(text, text_rect)
 
+            global schedule_left 
+            schedule_left = text_rect.left
 
+        def display_schedule():
 
+            #FINDS THE TASKS TO BE DISPLAYED   
+            task_count = 0
+            #Lists to hold the sorted tasks
+            overdue = [] 
+            high = []
+            med = []
+            low = []
+            to_do_list = []  
+              
+            #Finds and sorts the tasks
+            today = datetime.now() #Gets today's date for the calcualtions. It is outside the loop because there is no need to have it re-run many times.
+            for task in tasks:
+                date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
+                diff = today - date #Gets the difference between today's date and the date of the task. 
+
+                if diff.days > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
+                    overdue.append(task)
+                elif 'high' in tasks[task]['priority'].lower(): #If the priority is high, add it to the high list
+                    high.append(task)
+                elif 'med' in tasks[task]['priority'].lower(): #If the priority is medium, add it to the med list
+                    med.append(task)
+                elif 'low' in tasks[task]['priority'].lower():  #If the priority is low, add it to the low list
+                    low.append(task)
+                else:        #If the priority is anything else (i.e. the user screwed it up), add it to the low list.
+                    low.append(task)
+            
+            #Adds the high, medium, and low, priority task that are in the five most important to the to_do_list. The overdue tasks will be delt with seperately.
+            
+            while len(overdue) + len(to_do_list) < 5:
+                try:
+                    to_do_list.append(high[0])
+                    del(high[0])
+                except:
+                    try:
+                        to_do_list.append(med[0])
+                        del(med[0])
+                    except:
+                        try:
+                            to_do_list.append(low[0])
+                            del(low[0])
+                        except:
+                            pass
+
+            #DISPLAY THE TASKS
+            count = 0
+            x = schedule_left
+            y = 90
+
+            
+            for task in overdue: #Overdue tasks
+                if count > 5: break
+                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title = title_font.render(tasks[task]['title'], True, red)
+                title_rect = title.get_rect() 
+                title_rect.topleft = (x, y)
+                time = title_font.render(f'Time to complete: {tasks[task]["time to complete"]} min', True, magenta)
+                time_rect = time.get_rect() 
+                time_rect.topleft = (x + 10, y + 15)
+
+                screen.blit(title, title_rect)
+                screen.blit(time, time_rect)
+
+                y += 40
+                count += 1
+
+            for task in to_do_list: #All other tasks in order of priority
+                if count > 5: break
+                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title = title_font.render(tasks[task]['title'], True, green)
+                title_rect = title.get_rect() 
+                title_rect.topleft = (x, y)
+                time = title_font.render(f'Time to complete: {tasks[task]["time to complete"]} min', True, magenta)
+                time_rect = time.get_rect() 
+                time_rect.topleft = (x + 10, y + 15)
+
+                screen.blit(title, title_rect)
+                screen.blit(time, time_rect)
+
+                y += 40
+                count += 1
+            
         title()
-
+        display_schedule()
 
 
 
     def buttons(): #Creates the buttons at the left of the screen 
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
-        buttons_list = ['', ' MANAGE TASKS ', ' MANAGE SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
+        buttons_list = ['', ' MANAGE TASKS ', ' VIEW SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
         y = 2 * (250/len(buttons_list))
         biggest_width = 0 # Will hold the width of the widest button to maintain spacing with other objects.
 
-        global manageTasks_rect, manageSchedule_rect #Making these variables global lets you see if the mouse is clicking them as buttons
+        global manageTasks_rect, viewSchedule_rect #Making these variables global lets you see if the mouse is clicking them as buttons
 
         # Button for adding a task
         manageTasks_text = font.render(buttons_list[1], True, black, cyan)
@@ -547,15 +809,16 @@ def home(): #Creates the home screen
 
 
         # Button for deleting a task
-        manageSchedule_text = font.render(buttons_list[2], True, black, cyan)
-        manageSchedule_rect = manageSchedule_text.get_rect()
-        manageSchedule_rect.topleft = (5, y)
-        screen.blit(manageSchedule_text, manageSchedule_rect)
-        if manageSchedule_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
-            biggest_width = manageSchedule_rect.width
+        viewSchedule_text = font.render(buttons_list[2], True, black, cyan)
+        viewSchedule_rect = viewSchedule_text.get_rect()
+        viewSchedule_rect.topleft = (5, y)
+        screen.blit(viewSchedule_text, viewSchedule_rect)
+        if viewSchedule_rect.width > biggest_width: #Sets the value of biggest_width to the width of that rect if it is larger than the current value of biggest_width
+            biggest_width = viewSchedule_rect.width
         y += 250/len(buttons_list) #Moves the next button farther down
 
 
+        
 
 
     screen.fill(bg)
@@ -619,11 +882,11 @@ while running:
                     working['tasks']['running'] = True
                     func = 'home screen'
 
-                elif manageSchedule_rect.collidepoint(mouse_pos):
+                elif viewSchedule_rect.collidepoint(mouse_pos):
                     working['home']['start'] = False
                     working['tasks']['running'] = False
                     working['schedule']['running'] = True
-                    func = ''
+                    func = 'home screen'
 
             elif not working['home']['start']: #Makes the home button on every page but the home screen
                 if home_rect.collidepoint(mouse_pos):
@@ -778,7 +1041,7 @@ while running:
 
 
     if working['home']['start']: home()
-    elif working['schedule']['running']: manage_schedule(func)
+    elif working['schedule']['running']: view_schedule(func)
     elif working['tasks']['running']: manage_tasks(func)
 
     date_time_label()
