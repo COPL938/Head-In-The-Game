@@ -1,12 +1,12 @@
 import pygame
-from datetime import datetime
+from datetime import datetime, date
 from json import dump, load
 
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE) # Sets the size of the screen
 pygame.display.set_caption('Head In The Game')
-screen.fill((43, 43, 43)) #Sets the background color of the screen
+screen.fill((43, 43, 43))  #Sets the background color of the screen
 
 global biggest_width
 biggest_width = 0 #Variable that holds the width of objects for spacing
@@ -23,6 +23,8 @@ magenta = (255, 0, 255)
 yellow = (255, 255, 0)
 my_yellow = (241, 255, 148)
 my_purple = (158, 114, 196)
+orange = (253, 133, 19)
+blue = (0, 0, 255)
 
 
 # Housekeeping Functions
@@ -97,7 +99,7 @@ def manage_tasks(task_func): # A function to manage the tasks
 
     def screen_title(text):#Creates a title for the page
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
-        text = font.render(text, True, red)
+        text = font.render(text, True, orange)
         text_rect = text.get_rect()
         text_rect.center = (width / 2, 30)
         screen.blit(text, text_rect)
@@ -351,7 +353,7 @@ def manage_tasks(task_func): # A function to manage the tasks
 
             #For the warning instructions
             warning_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
-            warning = warning_font.render('This can not be undone.', True, red)
+            warning = warning_font.render('This can not be undone.', True, orange)
             warning_rect = warning.get_rect()
             warning_rect.topleft = (x, y)
             screen.blit(warning, warning_rect)
@@ -414,7 +416,7 @@ def view_schedule(schedule_func): # A function that will show the entire schedul
     #Everything here is a placeholder
     def screen_title():
         font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
-        text = font.render('VIEW SCHEDULE', True, red)
+        text = font.render('VIEW SCHEDULE', True, orange)
         text_rect = text.get_rect()
         text_rect.center = (width / 2, 30)
         screen.blit(text, text_rect)
@@ -626,15 +628,72 @@ def home(): #Creates the home screen
             text_rect = text.get_rect() #Creates the rect objects for the text
             text_rect.topleft = (x, y)
             screen.blit(text, text_rect) #Adds the rect objects to the screen
+        def start_end_dates(): #Finds the day of the month to start and end on.
+            #To keep track of the number of days per month
+            months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            months_30_days = ['April', 'June', 'September', 'November']
+            months_31_days = ['January', 'March', 'May', 'July', 'August', 'October', 'December']
 
+
+            today = datetime.now()
+            #Finds the number of days in the current month
+            if months[today.month - 1] in months_30_days: #-1 because the index starts at 0
+                current_end_day = 30
+            elif months[today.month - 1] in months_31_days:
+                current_end_day = 31
+
+            
+            #finds the number of days in the previous month
+            if months[today.month - 2] in months_31_days: #-1 because the index starts at 0, -1 to get the previous month
+                working_end_day = 31
+            elif months[today.month - 2] in months_30_days:
+                working_end_day = 30
+            else:
+                working_end_day = 28
+            
+            
+            if date(today.year, today.month, 1).isoweekday() == 7: #If the week starts on Sunday
+                start_date = 1
+                current_month = True #To keep track of when to go back to day 1
+            else:   
+                #Finds the start day
+                start_date = date(22, today.month-1, (working_end_day - (date(22, today.month, 1).isoweekday() - 1))).day
+                current_month = False #To keep track of when to go back to day 1
+            return(start_date, working_end_day, current_end_day, current_month)
+        
         x = 0 #Starts the calendar at the left edge
         y = 300 #Keeps the calendar at the bottom of the screen
-        day = 1
         width = pygame.display.get_surface().get_width()/7 #Divides the width of the screen by 7 so that the calendar takes up the width of the entire screen even if the user resizes.
+        month_font = pygame.font.Font('C:\Windows\Fonts\consola.ttf', 25) #Font to display name of the month
+        day_font = pygame.font.Font('C:\Windows\Fonts\consola.ttf', 10)     #Font to display weekdays
+
+
+        #Name of the month
+        month = datetime.now().strftime('%B')
+        month = month_font.render(month, True, orange)
+        month_rect = month.get_rect()#Creates rect object for the name of the month
+        month_rect.bottomleft = (0, 280)
+        screen.blit(month, month_rect)
+
+        #Weekdays
+        days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        for weekday in days:
+            day_text = day_font.render(weekday, True, yellow)
+            day_rect = day_text.get_rect()
+            day_rect.topleft = (width * (days.index(weekday)), 285)
+            screen.blit(day_text, day_rect)
+
+        day, working_end_day, current_end_day, current_month = start_end_dates() #Finds the day of the month to start on, the last day of the previous month, the last day of the current month, and if it needs to start on a previous month to fill the calendar properly
+
+        
         for i in range(5): #Creates 5 rows
             for i in range(7): #Creates 7 days in a row
                 pygame.draw.rect(screen, grey, (x, y, width, 75), 1)  # Creates the box for each day
-                if day == 32: day = 1 #Resets the calendar back to day 1
+                if not current_month and day > working_end_day: 
+                    day = 1 #Resets the day to the current month (from the previous one)
+                    current_month = True #Now the 
+                elif current_month and day > current_end_day:
+                    day = 1 #Resets the day for the next month
                 set_nums(x, y, day) #Adds the number to the box
                 x += width #Adds to the x variable so the next square is not in the same place
                 day += 1 #Adds one to the day variable to raise the number in the day 
@@ -647,7 +706,7 @@ def home(): #Creates the home screen
         def title(): #A function that creates the title for the page
             #Creates the text and rect objects for the title
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
-            text = font.render('TASKS', True, red)
+            text = font.render('TASKS', True, orange)
             text_rect = text.get_rect()
             x = (width - biggest_width - 20) / 3 
             text_rect.center = (x, 30)
@@ -666,7 +725,7 @@ def home(): #Creates the home screen
                     
                 # Displays the title and descrition of each task
                 title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
-                title = title_font.render(tasks[task]['title'], True, green)
+                title = title_font.render(tasks[task]['title'], True, blue)
                 title_rect = title.get_rect() 
                 title_rect.topleft = (x, y)
                 desc = title_font.render(tasks[task]['description'], True, magenta)
@@ -692,7 +751,7 @@ def home(): #Creates the home screen
 
         def title():
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
-            text = font.render('SCHEDULE', True, red)
+            text = font.render('SCHEDULE', True, orange)
             text_rect = text.get_rect()
             x = 2 * ((width - biggest_width -20 ) / 3 )
             text_rect.center = (x, 30)
