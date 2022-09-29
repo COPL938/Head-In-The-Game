@@ -104,7 +104,7 @@ def manage_tasks(task_func): # A function to manage the tasks
         text_rect.center = (width / 2, 30)
         screen.blit(text, text_rect)
 
-    def display_tasks(complete): #Displays the tasks
+    def display_tasks(complete, adding): #Displays the tasks
 
         def title(text, x, y): #A function that creates the title for each task
             font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
@@ -117,7 +117,7 @@ def manage_tasks(task_func): # A function to manage the tasks
             if title_rect.width > big_task_width: big_task_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
 
         def info(text, x, y): #Displays the info for the task
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 10)
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 13)
             description = font.render(text, True, magenta)
             description_rect = description.get_rect() 
             description_rect.topleft = (x, y)
@@ -125,8 +125,8 @@ def manage_tasks(task_func): # A function to manage the tasks
             global big_task_width
             if description_rect.width > big_task_width: big_task_width = description_rect.width #Puts the width of the widest rect in that variable to maintain spacing
 
-        x = 150
-        y = 90
+        x = 25
+        y = 115
         
         global big_task_width
         big_task_width = 0 #To Figure out the width of the widest text so the next column does not overlap.
@@ -134,10 +134,15 @@ def manage_tasks(task_func): # A function to manage the tasks
 
         count = 1 #To display the task numbers for the complete task function
         for task in tasks:
-            if task == 'completing': continue
+            if task == 'completing': continue 
             if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 3: return #I only want 2 columns, this will stop a third from being created
                 y = 90
+                if complete: #Moves the second column beneath the complete task stuff.
+                    y = 300
+                if adding: #Keeps only one column in the adding screen
+                    break
+                    
                 x = x + big_task_width + 50 #For spacing
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 
@@ -145,15 +150,20 @@ def manage_tasks(task_func): # A function to manage the tasks
             if complete: title(f'Task #{count} - {tasks[task]["title"]}', x, y)
             else: title(f'{tasks[task]["title"]}', x, y)
             x += 10 #Indents the descriptions
-            y += 20 #Increasing the Y value moves the following description down so they're not overlapping 
+            y += 10 #Increasing the Y value moves the following description down so they're not overlapping 
             info(tasks[task]['description'], x, y)
             y += 15
-            info(tasks[task]['priority'], x, y)
-            y += 15
-            info(tasks[task]['date'], x, y)
-            y += 15
-            info(str(tasks[task]['time to complete']), x, y)
-            y += 25
+            if not complete and not adding: #On the complete page, only show the title and description
+                info(tasks[task]['priority'], x, y)
+                y += 15
+            if not complete and not adding: #On the complete page, only show the title and description                
+                info(tasks[task]['date'], x, y)
+                y += 15
+            if not complete and not adding: #On the complete page, only show the title and description
+                info(str(tasks[task]['time to complete']), x, y)
+                y += 25
+            if complete or adding:
+                y += 10 #Keeps enough space between the tasks
             x -= 10 #Unindents for the next title
 
             count += 1 #To display task numbers for the complete_task function
@@ -189,7 +199,7 @@ def manage_tasks(task_func): # A function to manage the tasks
     def add_task(add_func):
         clear()
         screen_title('ADD A TASK')
-        display_tasks(False)
+        display_tasks(False, True)
 
 
         def display_prompt(text, x, y): #A function that creates the prompt for each input
@@ -311,7 +321,7 @@ def manage_tasks(task_func): # A function to manage the tasks
     def complete_task(complete_func):
         clear()
         screen_title('COMPLETE A TASK')
-        display_tasks(True)
+        display_tasks(True, False)
 
         def done():
 
@@ -398,7 +408,7 @@ def manage_tasks(task_func): # A function to manage the tasks
     if task_func == 'home screen':
         working['tasks']['main'] = True
         screen_title('MANAGE TASKS')
-        display_tasks(False)
+        display_tasks(False, False)
         tasks_buttons()
     elif 'add task' in task_func:
         add_task(task_func)
@@ -427,6 +437,7 @@ def view_schedule(schedule_func): # A function that will show the entire schedul
         high = []
         med = []
         low = []
+        
         today = datetime.now() #Gets today's date for the calcualtions. It is outside the loop because there is no need to have it re-run many times.
         for task in tasks:
             date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
@@ -634,7 +645,6 @@ def home(): #Creates the home screen
             months_30_days = ['April', 'June', 'September', 'November']
             months_31_days = ['January', 'March', 'May', 'July', 'August', 'October', 'December']
 
-
             today = datetime.now()
             #Finds the number of days in the current month
             if months[today.month - 1] in months_30_days: #-1 because the index starts at 0
@@ -812,7 +822,7 @@ def home(): #Creates the home screen
 
             
             for task in overdue: #Overdue tasks
-                if count > 5: break
+                if count > 4: break
                 title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
                 title = title_font.render(tasks[task]['title'], True, red)
                 title_rect = title.get_rect() 
