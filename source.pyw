@@ -7,7 +7,6 @@ pygame.init()
 screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE) # Sets the size of the screen
 pygame.display.set_caption('Head In The Game')
 screen.fill((43, 43, 43))  #Sets the background color of the screen
-
 global biggest_width
 biggest_width = 0 #Variable that holds the width of objects for spacing
 
@@ -37,9 +36,12 @@ def start_up(): #Create the temp and task dicts and the copleting variable
     tasks = {}
 
     #Add the contents of the task.json file to the tasks dictionary.
-    with open('tasks.json') as file:
-        raw = load(file)
-    tasks.update(raw)
+    try:
+        with open('tasks.json') as file:
+            raw = load(file)
+        tasks.update(raw)
+    except:
+        tasks = {}
     #Find the highest task number used so far
     keys = list(tasks.keys())
     num = 0 #Variable to find the highest task number used already
@@ -57,6 +59,7 @@ def start_up(): #Create the temp and task dicts and the copleting variable
             'description': '',
             'priority': '',
             'date': '',
+            'time to start': '',
             'time to complete': ''
         }
     }
@@ -140,7 +143,7 @@ def manage_tasks(task_func, button): # A function to manage the tasks
         count = 1 #To display the task numbers for the complete task function
         for task in tasks:
             if task == 'completing': continue 
-            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+            if y > pygame.display.get_surface().get_height() - 100: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 3: return #I only want 2 columns, this will stop a third from being created
                 y = 90
                 if complete: #Moves the second column beneath the complete task stuff.
@@ -163,6 +166,9 @@ def manage_tasks(task_func, button): # A function to manage the tasks
                 y += 15
             if not complete and not adding: #On the complete page, only show the title and description                
                 info(tasks[task]['date'], x, y)
+                y += 15
+            if not complete and not adding: #On the complete page, only show the title and description
+                info(str(tasks[task]['time to start']), x, y)
                 y += 15
             if not complete and not adding: #On the complete page, only show the title and description
                 info(str(tasks[task]['time to complete']), x, y)
@@ -222,8 +228,16 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             title_rect = title.get_rect()
             title_rect.topleft = (x, y)
             screen.blit(title, title_rect)
+            return  title_rect.right + 5, title_rect.centery
 
-        
+        def display_instr(text, left, y): # A function to display instructions for the user
+            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+            title = font.render(text, True, my_purple, bg)
+            title_rect = title.get_rect()
+            title_rect.left = left
+            title_rect.centery = y
+            screen.blit(title, title_rect)
+
         def done():
 
             tasks.update(temp)
@@ -243,16 +257,17 @@ def manage_tasks(task_func, button): # A function to manage the tasks
 
 
             #Rects need to be global so they can be acessed in the game loop
-            global adding_title_backdrop, adding_desc_backdrop, adding_priority_backdrop, adding_date_backdrop, adding_time_backdrop
+            global adding_title_backdrop, adding_desc_backdrop, adding_priority_backdrop, adding_date_backdrop, adding_time_backdrop, adding_startTime_backdrop
             #input strings
             
             #change the color of the textbox when it's selected
-            title_color = desc_color = priority_color = date_color = time_color = black
+            title_color = desc_color = priority_color = date_color = time_color = start_color = black
             if color_to_change == 'title': title_color = black_active
             elif color_to_change == 'desc': desc_color = black_active
             elif color_to_change == 'priority': priority_color = black_active
             elif color_to_change == 'date': date_color = black_active
             elif color_to_change == 'time': time_color = black_active
+            elif color_to_change == 'start_time': start_color = black_active
 
 
             # Title                                                                    Create the prompts and rectangles for inputs
@@ -276,7 +291,8 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             y += 40
 
             #Priority
-            display_prompt('Priority (high/medium/low)        ', x, y)
+            instr_left, instr_y = display_prompt('Priority', x, y) #Those two variables are for the instrucitons
+            display_instr('(high/medium/low)       ', instr_left, instr_y)
             y += 35
             priority = input_font.render(temp[task_num]['priority'], True, my_yellow)
             adding_priority_backdrop = pygame.draw.rect(screen, priority_color, (x, y, 400, 30))
@@ -287,7 +303,8 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             #TODO PRIORITY DROPDOWN
 
             #Due date
-            display_prompt('Due Date (mm/dd/yy)     ', x, y)
+            instr_left, instr_y = display_prompt('Due Date ', x, y)
+            display_instr('(mm/dd/yy)     ', instr_left, instr_y)
             y += 35
             date = input_font.render(temp[task_num]['date'], True, my_yellow)
             adding_date_backdrop = pygame.draw.rect(screen, date_color, (x, y, 400, 30))
@@ -296,8 +313,22 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             screen.blit(date, adding_date_rect)
             y += 40
 
+            
+            #Time to start
+            instr_left, instr_y = display_prompt('What time do you want to start?', x, y)
+            display_instr('(hh:mm AM/PM)', instr_left, instr_y)
+            y += 35
+            startTime = input_font.render(temp[task_num]['time to start'], True, my_yellow)
+            adding_startTime_backdrop = pygame.draw.rect(screen, start_color, (x, y, 400, 30))
+            adding_startTime_rect = startTime.get_rect()
+            adding_startTime_rect.topleft = (x+5, y+5)
+            screen.blit(startTime, adding_startTime_rect)
+            y += 40
+
+
             #Time
-            display_prompt('How long will it take to complete? (min)', x, y)
+            instr_left, instr_y = display_prompt('How long will it take to complete?', x, y)
+            display_instr('(min)', instr_left, instr_y)
             y += 35
             time = input_font.render(temp[task_num]['time to complete'], True, my_yellow)
             adding_time_backdrop = pygame.draw.rect(screen, time_color, (x, y, 400, 30))
@@ -321,13 +352,13 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             #Done button
             done_button = done_button_font.render('   DONE   ', True, black, done_color)
             add_done_button = done_button.get_rect()
-            add_done_button.topright = (695, 470)
+            add_done_button.topright = (695, 535)
             screen.blit(done_button, add_done_button)
 
             #Cancel Cutton
             cancel_button = done_button_font.render(' CANCEL ', True, black, cancel_color)
             add_cancel_button = cancel_button.get_rect()
-            add_cancel_button.topleft = (705, 470)
+            add_cancel_button.topleft = (705, 535)
             screen.blit(cancel_button, add_cancel_button)
 
         if 'done' in add_func:
@@ -338,6 +369,7 @@ def manage_tasks(task_func, button): # A function to manage the tasks
             elif 'priority' in add_func: main('priority', button)
             elif 'date' in add_func: main('date', button)
             elif 'time' in add_func: main('time', button)
+            elif 'start' in add_func: main('start_time', button)
             else: main('', button)
 
 
@@ -349,17 +381,24 @@ def manage_tasks(task_func, button): # A function to manage the tasks
         def done():
 
             global completing
-            completing = int(completing) - 1
-            keys = list(tasks.keys())
-            my_key = keys[completing]
-            del(tasks[my_key])
+            try:
+                completing = int(completing) - 1
+                keys = list(tasks.keys())
+                my_key = keys[completing]
+                del(tasks[my_key])
 
-            working['tasks']['completing_task'] = False
-            global func
-            func = 'home screen'
+                working['tasks']['completing_task'] = False
+                global func
+                func = 'home screen'
 
-            completing = ''
+                completing = ''
+            except:
+                working['tasks']['completing_task'] = False
+                func = 'home screen'
 
+                completing = ''
+
+                
         def main(clicked, colored_button):
 
             if clicked: color = black_active
@@ -470,10 +509,16 @@ def view_schedule(schedule_func, button): # A function that will show the entire
         
         today = datetime.now() #Gets today's date for the calcualtions. It is outside the loop because there is no need to have it re-run many times.
         for task in tasks:
-            date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
-            diff = today - date #Gets the difference between today's date and the date of the task. 
-            if diff.days > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
+            try:
+                date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
+                diff = today - date #Gets the difference between today's date and the date of the task. 
+                diff = diff.days
+            except:
+                diff = -1
+            
+            if diff > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
                 overdue.append(task)
+            
             elif 'high' in tasks[task]['priority'].lower(): #If the priority is high, add it to the high list
                 high.append(task)
             elif 'med' in tasks[task]['priority'].lower(): #If the priority is medium, add it to the med list
@@ -497,7 +542,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
             
         for task in overdue:
             #Manages columns
-            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+            if y > pygame.display.get_surface().get_height() - 100: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 4: return #I only want 3 columns, this will stop a third from being created
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 y = 115
@@ -520,7 +565,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
             #overdue task info in yellow
             for item in tasks[task]:
-                #if item == 'title': continue #Skip the title
+                if item == 'title': continue #Skip the title
                 font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
                 description = font.render(tasks[task][item], True, magenta)
                 description_rect = description.get_rect() 
@@ -536,7 +581,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
         for task in high:
             #Manages columns
-            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+            if y > pygame.display.get_surface().get_height() - 100: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 4: return #I only want 3 columns, this will stop a third from being created
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 y = 115
@@ -559,7 +604,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
             #overdue task info in yellow
             for item in tasks[task]:
-                #if item == 'title': continue #Skip the title
+                if item == 'title': continue #Skip the title
                 font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
                 description = font.render(tasks[task][item], True, magenta)
                 description_rect = description.get_rect() 
@@ -575,7 +620,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
             
         for task in med:
             #Manages columns
-            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+            if y > pygame.display.get_surface().get_height() - 100: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 4: return #I only want 3 columns, this will stop a third from being created
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 y = 115
@@ -598,7 +643,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
             #overdue task info in yellow
             for item in tasks[task]:
-                #if item == 'title': continue #Skip the title
+                if item == 'title': continue #Skip the title
                 font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
                 description = font.render(tasks[task][item], True, magenta)
                 description_rect = description.get_rect() 
@@ -614,7 +659,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
         for task in low:
             #Manages columns
-            if y > 600: #If the list of tasks is longer than can fit in one column, start a second column
+            if y > pygame.display.get_surface().get_height() - 100: #If the list of tasks is longer than can fit in one column, start a second column
                 if columns == 4: return #I only want 3 columns, this will stop a third from being created
                 columns += 1 #I only want 3 columns, this will stop a fourth from being created
                 y = 115
@@ -637,7 +682,7 @@ def view_schedule(schedule_func, button): # A function that will show the entire
 
             #overdue task info in yellow
             for item in tasks[task]:
-                #if item == 'title': continue #Skip the title
+                if item == 'title': continue #Skip the title
                 font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
                 description = font.render(tasks[task][item], True, magenta)
                 description_rect = description.get_rect() 
@@ -815,10 +860,13 @@ def home(button): #Creates the home screen
             #Finds and sorts the tasks
             today = datetime.now() #Gets today's date for the calcualtions. It is outside the loop because there is no need to have it re-run many times.
             for task in tasks:
-                date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
-                diff = today - date #Gets the difference between today's date and the date of the task. 
-
-                if diff.days > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
+                try:
+                    date = datetime.strptime(tasks[task]['date'], '%m/%d/%y')
+                    diff = today - date #Gets the difference between today's date and the date of the task. 
+                    diff = diff.days
+                except:
+                    diff = -1
+                if diff > 0: #If the number of days between the date and today it positve, the taskis overdue add its dict key to the overdue list
                     overdue.append(task)
                 elif 'high' in tasks[task]['priority'].lower(): #If the priority is high, add it to the high list
                     high.append(task)
@@ -845,6 +893,8 @@ def home(button): #Creates the home screen
                             del(low[0])
                         except:
                             pass
+                if high == [] and med == [] and low == []:
+                    break
 
             #DISPLAY THE TASKS
             count = 0
@@ -855,15 +905,17 @@ def home(button): #Creates the home screen
             for task in overdue: #Overdue tasks
                 if count > 5: break
                 title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
-                title = title_font.render(tasks[task]['title'], True, red)
+                title = title_font.render(tasks[task]['title'], True, red, bg)
                 title_rect = title.get_rect() 
                 title_rect.topleft = (x, y)
-                time = title_font.render(f'Time to complete: {tasks[task]["time to complete"]} min', True, magenta)
-                time_rect = time.get_rect() 
-                time_rect.topleft = (x + 10, y + 15)
 
+                start = title_font.render(f'Start At: {tasks[task]["time to start"]}', True, magenta, bg)
+                start_rect = start.get_rect()
+                start_rect.topleft = (x + 30, y + 15)
+
+            
                 screen.blit(title, title_rect)
-                screen.blit(time, time_rect)
+                screen.blit(start, start_rect)
 
                 y += 40
                 count += 1
@@ -874,13 +926,14 @@ def home(button): #Creates the home screen
                 title = title_font.render(tasks[task]['title'], True, green)
                 title_rect = title.get_rect() 
                 title_rect.topleft = (x, y)
-                time = title_font.render(f'Time to complete: {tasks[task]["time to complete"]} min', True, magenta)
-                time_rect = time.get_rect() 
-                time_rect.topleft = (x + 10, y + 15)
 
+                start = title_font.render(f'Start At: {tasks[task]["time to start"]}', True, magenta, bg)
+                start_rect = start.get_rect()
+                start_rect.topleft = (x + 30, y + 15)
+
+                
                 screen.blit(title, title_rect)
-                screen.blit(time, time_rect)
-
+                screen.blit(start, start_rect)
                 y += 40
                 count += 1
             
@@ -961,6 +1014,7 @@ working = {
         'adding_priority': False, #Controlling what key presses do
         'adding_date': False, #Controlling what key presses do
         'adding_time': False, #Controlling what key presses do
+        'adding_start': False, #Controlling what key presses do
         'completing_task': False, #Keeps the complete_task function from being run
         'completing_task_editing': False, #Controlling what key presses do
     }
@@ -978,7 +1032,7 @@ start_up()
 while running:
     width = pygame.display.get_surface().get_width() #It is inside the loop so that it changes if the window is resized
 
-    for event in pygame.event.get():
+    for event in pygame.event.get(): #Manage events
         #If the user hits the close button.
         if event.type == pygame.QUIT:
             running = False
@@ -1032,6 +1086,7 @@ while running:
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = False
                         working['tasks']['adding_time'] = False
+                        working['tasks']['adding_start'] = False
 
                         func = 'add task title' #When the title text box is selected, this will tell it to change the color
                     
@@ -1042,6 +1097,7 @@ while running:
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = False
                         working['tasks']['adding_time'] = False
+                        working['tasks']['adding_start'] = False
 
                         func = 'add task desc' #When the description text box is selected, this will tell it to change the color
                     
@@ -1052,6 +1108,7 @@ while running:
                         working['tasks']['adding_priority'] = True
                         working['tasks']['adding_date'] = False
                         working['tasks']['adding_time'] = False
+                        working['tasks']['adding_start'] = False
 
                         func = 'add task priority' #When the priority text box is selected, this will tell it to change the color
 
@@ -1062,6 +1119,7 @@ while running:
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = True
                         working['tasks']['adding_time'] = False
+                        working['tasks']['adding_start'] = False
 
                         func = 'add task date' #When the date text box is selected, this will tell it to change the color
 
@@ -1071,10 +1129,22 @@ while running:
                         working['tasks']['adding_desc'] = False
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = False
+                        working['tasks']['adding_start'] = False
                         working['tasks']['adding_time'] = True
 
                         func = 'add task time' #When the time text box is selected, this will tell it to change the color
                     
+                    elif adding_startTime_backdrop.collidepoint(mouse_pos): #Adding to the start time
+                        #So that the keys only add to the start time
+                        working['tasks']['adding_title'] = False
+                        working['tasks']['adding_desc'] = False
+                        working['tasks']['adding_priority'] = False
+                        working['tasks']['adding_date'] = False
+                        working['tasks']['adding_start'] = True
+                        working['tasks']['adding_time'] = False 
+
+                        func = 'add task start'
+
                     elif add_done_button.collidepoint(mouse_pos): #Done button
                         #Make the textboxes stop working
                         working['tasks']['adding_title'] = False
@@ -1082,6 +1152,8 @@ while running:
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = False
                         working['tasks']['adding_time'] = False 
+                        working['tasks']['adding_start'] = False
+
 
                         func = 'add task done'
 
@@ -1096,6 +1168,7 @@ while running:
                         working['tasks']['adding_priority'] = False
                         working['tasks']['adding_date'] = False
                         working['tasks']['adding_time'] = False
+                        working['tasks']['adding_start'] = False
 
                         func = 'add task'
 
@@ -1141,6 +1214,11 @@ while running:
                         temp[task_num]['time to complete'] = temp[task_num]['time to complete'][:-1]
                     else:
                         temp[task_num]['time to complete'] += event.unicode
+                if working['tasks']['adding_start']: #For the start time
+                    if event.key == pygame.K_BACKSPACE:
+                        temp[task_num]['time to start'] = temp[task_num]['time to start'][:-1]
+                    else:
+                        temp[task_num]['time to start'] += event.unicode
                 if working['tasks']['completing_task_editing']: #To complete a task
                     if event.key == pygame.K_BACKSPACE:
                         completing = completing[:-1]
@@ -1196,7 +1274,10 @@ while running:
                             button_color = ''
             except: None
 
-    print(button_color)
+    if datetime.now().minute % 15 == 0: #Saves the tasks to the json file every 15 minutes
+        shut_down
+        start_up()
+
     if working['home']['start']: home(button_color)
     elif working['schedule']['running']: view_schedule(func, button_color)
     elif working['tasks']['running']: manage_tasks(func, button_color)
