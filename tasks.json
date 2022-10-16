@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
     "Task_1": {
         "title": "Hello World",
@@ -14,3 +15,23 @@
         "time to complete": "60480"
     }
 }
+=======
+{
+    "Task_1": {
+        "title": "Hello World",
+        "description": "A simple task to test the program.",
+        "priority": "Medium",
+        "date": "09/21/22",
+        "time to start": "09:00 AM",
+        "time to complete": "1"
+    },
+    "Task_2":{
+        "title": "App",
+        "description": "Look at the App - remember to give feedback!",
+        "priority": "Low",
+        "date": "10/31/22",
+        "time to start": "12:59 PM",
+        "time to complete": "43200"
+    }
+}
+>>>>>>> Stashed changes
