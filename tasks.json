@@ -1,21 +1,3 @@
-<<<<<<< Updated upstream
-{
-    "Task_1": {
-        "title": "Hello World",
-        "description": "A simple task to test the program.",
-        "priority": "Medium",
-        "date": "09/21/22",
-        "time to complete": "1"
-    },
-    "Task_2": {
-        "title": "Congressional App Challenge",
-        "description": "Finish the Head In The Game app for the CAC",
-        "priority": "High",
-        "date": "11/01/22",
-        "time to complete": "60480"
-    }
-}
-=======
 {
     "Task_1": {
         "title": "Hello World",
@@ -34,4 +16,3 @@
         "time to complete": "43200"
     }
 }
->>>>>>> Stashed changes
