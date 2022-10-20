@@ -17,8 +17,8 @@ def main(): #The main function that controls the game.
     bg = (43, 43, 43)
     black = (0, 0, 0)
     black_active = (64, 64, 64)
-    cyan = (128, 39, 16)
-    cyan_active = (185, 56, 24)
+    cyan = (66, 155, 245)
+    cyan_active = (66, 125, 245)
     grey = (166, 166, 166)
     info_color = (75, 116, 107)
     overdue_red = (159, 0, 80)
@@ -107,7 +107,7 @@ def main(): #The main function that controls the game.
         else:
             home_button_color = cyan
         global home_rect
-        font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+        font = pygame.font.Font('klavika-light.ttf', 20)
         home = font.render(' HOME ', True, black, home_button_color)
         home_rect = home.get_rect()
         home_rect.topleft = (15, 70)
@@ -118,7 +118,7 @@ def main(): #The main function that controls the game.
         home_button(active_button)
 
     def date_time_label(): #Shows the time and date
-        font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+        font = pygame.font.Font('klavika-light.ttf', 20)
         ctime = datetime.now().strftime('%I:%M:%S %p') #These will display the time and date
         if int(ctime[:2]) < 10: ctime = ctime.replace('0', '', 1) 
         cdate = datetime.now().strftime('%A, %m/%d/%y')
@@ -138,7 +138,7 @@ def main(): #The main function that controls the game.
     def manage_tasks(task_func, button): # A function to manage the tasks 
 
         def screen_title(text):#Creates a title for the page
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
+            font = pygame.font.Font('klavika-light.ttf', 35)
             text = font.render(text, True, title_yellow)
             text_rect = text.get_rect()
             text_rect.center = (width / 2, 30)
@@ -147,7 +147,7 @@ def main(): #The main function that controls the game.
         def display_tasks(complete, adding): #Displays the tasks
 
             def title(text, x, y): #A function that creates the title for each task
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                font = pygame.font.Font('klavika-light.ttf', 15)
                 title = font.render(text, True, task_green)
                 title_rect = title.get_rect()
                 title_rect.centery = y
@@ -157,7 +157,7 @@ def main(): #The main function that controls the game.
                 if title_rect.width > big_task_width: big_task_width = title_rect.width #Puts the width of the widest rect in that variable to maintain spacing
 
             def info(text, x, y): #Displays the info for the task
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 13)
+                font = pygame.font.Font('klavika-light.ttf', 13)
                 description = font.render(text, True, info_color)
                 description_rect = description.get_rect() 
                 description_rect.topleft = (x, y)
@@ -223,7 +223,7 @@ def main(): #The main function that controls the game.
             
             global addTask_rect, addTask_text, completeTask_rect
 
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+            font = pygame.font.Font('klavika-light.ttf', 20)
             biggest_width = 0
             x = width - 15
             y = (pygame.display.get_surface().get_height() / 2) / 3
@@ -255,7 +255,7 @@ def main(): #The main function that controls the game.
 
 
             def display_prompt(text, x, y): #A function that creates the prompt for each input
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 25)
+                font = pygame.font.Font('klavika-light.ttf', 25)
                 title = font.render(text, True, prompt_purple, bg)
                 title_rect = title.get_rect()
                 title_rect.topleft = (x, y)
@@ -263,7 +263,7 @@ def main(): #The main function that controls the game.
                 return  title_rect.right + 5, title_rect.centery
 
             def display_instr(text, left, y): # A function to display instructions for the user
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                font = pygame.font.Font('klavika-light.ttf', 15)
                 title = font.render(text, True, prompt_purple, bg)
                 title_rect = title.get_rect()
                 title_rect.left = left
@@ -292,7 +292,7 @@ def main(): #The main function that controls the game.
                 x = 500
                 y = 90
                 
-                input_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20) #For the inputs
+                input_font = pygame.font.Font('klavika-light.ttf', 20) #For the inputs
 
 
                 #Rects need to be global so they can be acessed in the game loop
@@ -400,7 +400,7 @@ def main(): #The main function that controls the game.
 
                 #Buttons
                 global add_done_button, add_cancel_button
-                done_button_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+                done_button_font = pygame.font.Font('klavika-light.ttf', 30)
 
                 #Change button colors
                 done_color = cyan
@@ -469,7 +469,7 @@ def main(): #The main function that controls the game.
                 y = 90
 
                 #Creates the prompt
-                prompt_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 25)
+                prompt_font = pygame.font.Font('klavika-light.ttf', 25)
                 prompt = prompt_font.render('Which task would you like to mark completed?', True, prompt_purple)
                 prompt_rect = prompt.get_rect()
                 prompt_rect.topleft = (x, y)
@@ -477,7 +477,7 @@ def main(): #The main function that controls the game.
                 y += 35 #Moves the instructions down
 
                 #For the prompt instructions
-                inst_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+                inst_font = pygame.font.Font('klavika-light.ttf', 20)
                 inst = inst_font.render('Please only type in the number.', True, prompt_purple)
                 inst_rect = inst.get_rect()
                 inst_rect.topleft = (x, y)
@@ -485,7 +485,7 @@ def main(): #The main function that controls the game.
                 y += 30 #Moves the input down
 
                 #For the warning instructions
-                warning_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                warning_font = pygame.font.Font('klavika-light.ttf', 15)
                 warning = warning_font.render('This can not be undone.', True, title_yellow)
                 warning_rect = warning.get_rect()
                 warning_rect.topleft = (x, y)
@@ -493,7 +493,7 @@ def main(): #The main function that controls the game.
                 y += 25 #Moves the input down
 
                 #For the input
-                input_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20) #For the inputs
+                input_font = pygame.font.Font('klavika-light.ttf', 20) #For the inputs
                 global complete_backdrop, completing    #Global so that the game loop can see if the mouse clicked it
                 user_input = input_font.render(completing, True, text_yellow) #Displays the input
                 complete_backdrop = pygame.draw.rect(screen, color, (x, y, 400, 30)) #Black backdrop
@@ -508,7 +508,7 @@ def main(): #The main function that controls the game.
 
                 #Buttons
                 global complete_done_button, complete_cancel_button
-                done_button_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+                done_button_font = pygame.font.Font('klavika-light.ttf', 30)
 
                 #Changes the color of the buttons
                 done_button_color = cyan
@@ -559,7 +559,7 @@ def main(): #The main function that controls the game.
 
         #Everything here is a placeholder
         def screen_title():
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 35)
+            font = pygame.font.Font('klavika-light.ttf', 35)
             text = font.render('VIEW SCHEDULE', True, title_yellow)
             text_rect = text.get_rect()
             text_rect.center = (width / 2, 30)
@@ -631,7 +631,7 @@ def main(): #The main function that controls the game.
 
 
                 #adds the title for the overdue task in red
-                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title_font = pygame.font.Font('klavika-light.ttf', 15)
                 title = title_font.render(tasks[task]['title'], True, overdue_red)
                 title_rect = title.get_rect()
                 title_rect.centery = y
@@ -645,7 +645,7 @@ def main(): #The main function that controls the game.
                 #overdue task info in yellow
                 for item in tasks[task]:
                     if item == 'title': continue #Skip the title
-                    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                    font = pygame.font.Font('klavika-light.ttf', 12)
                     description = font.render(tasks[task][item], True, info_color)
                     description_rect = description.get_rect() 
                     description_rect.topleft = (x, y)
@@ -670,7 +670,7 @@ def main(): #The main function that controls the game.
 
 
                 #adds the title for the high task in green
-                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title_font = pygame.font.Font('klavika-light.ttf', 15)
                 title = title_font.render(tasks[task]['title'], True, task_green)
                 title_rect = title.get_rect()
                 title_rect.centery = y
@@ -684,7 +684,7 @@ def main(): #The main function that controls the game.
                 #overdue task info in yellow
                 for item in tasks[task]:
                     if item == 'title': continue #Skip the title
-                    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                    font = pygame.font.Font('klavika-light.ttf', 12)
                     description = font.render(tasks[task][item], True, info_color)
                     description_rect = description.get_rect() 
                     description_rect.topleft = (x, y)
@@ -709,7 +709,7 @@ def main(): #The main function that controls the game.
 
 
                 #adds the title for the medium task in green
-                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title_font = pygame.font.Font('klavika-light.ttf', 15)
                 title = title_font.render(tasks[task]['title'], True, task_green)
                 title_rect = title.get_rect()
                 title_rect.centery = y
@@ -723,7 +723,7 @@ def main(): #The main function that controls the game.
                 #overdue task info in yellow
                 for item in tasks[task]:
                     if item == 'title': continue #Skip the title
-                    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                    font = pygame.font.Font('klavika-light.ttf', 12)
                     description = font.render(tasks[task][item], True, info_color)
                     description_rect = description.get_rect() 
                     description_rect.topleft = (x, y)
@@ -748,7 +748,7 @@ def main(): #The main function that controls the game.
 
 
                 #adds the title for the low task in green
-                title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                title_font = pygame.font.Font('klavika-light.ttf', 15)
                 title = title_font.render(tasks[task]['title'], True, task_green)
                 title_rect = title.get_rect()
                 title_rect.centery = y
@@ -762,7 +762,7 @@ def main(): #The main function that controls the game.
                 #overdue task info in yellow
                 for item in tasks[task]:
                     if item == 'title': continue #Skip the title
-                    font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 12)
+                    font = pygame.font.Font('klavika-light.ttf', 12)
                     description = font.render(tasks[task][item], True, info_color)
                     description_rect = description.get_rect() 
                     description_rect.topleft = (x, y)
@@ -873,7 +873,7 @@ def main(): #The main function that controls the game.
             
             def title(): #A function that creates the title for the page
                 #Creates the text and rect objects for the title
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+                font = pygame.font.Font('klavika-light.ttf', 30)
                 text = font.render('TASKS', True, title_yellow)
                 text_rect = text.get_rect()
                 x = (width - biggest_width - 20) / 3 
@@ -893,7 +893,7 @@ def main(): #The main function that controls the game.
                         continue
                         
                     # Displays the title and descrition of each task
-                    title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                    title_font = pygame.font.Font('klavika-light.ttf', 15)
                     title = title_font.render(tasks[task]['title'], True, task_blue)
                     title_rect = title.get_rect() 
                     title_rect.topleft = (x, y)
@@ -919,7 +919,7 @@ def main(): #The main function that controls the game.
             working_width = working_width + working_width 
 
             def title():
-                font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 30)
+                font = pygame.font.Font('klavika-light.ttf', 30)
                 text = font.render('SCHEDULE', True, title_yellow)
                 text_rect = text.get_rect()
                 x = 2 * ((width - biggest_width -20 ) / 3 )
@@ -993,7 +993,7 @@ def main(): #The main function that controls the game.
                 for task in overdue: #Overdue tasks 
                     
                     if y >= cal_top - 35: continue #don't do anything on this iteration of the loop if the tasks will go onto the calendar 
-                    title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                    title_font = pygame.font.Font('klavika-light.ttf', 15)
                     title = title_font.render(tasks[task]['title'], True, overdue_red, bg)
                     title_rect = title.get_rect() 
                     title_rect.topleft = (x, y)
@@ -1009,7 +1009,7 @@ def main(): #The main function that controls the game.
 
                 for task in to_do_list: #All other tasks in order of priority 
                     if y > cal_top - 35: continue #don't do anything on this iteration of the loop
-                    title_font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 15)
+                    title_font = pygame.font.Font('klavika-light.ttf', 15)
                     title = title_font.render(tasks[task]['title'], True, task_green)
                     title_rect = title.get_rect() 
                     title_rect.topleft = (x, y)
@@ -1029,7 +1029,7 @@ def main(): #The main function that controls the game.
 
 
         def buttons(button): #Creates the buttons at the left of the screen 
-            font = pygame.font.Font('C:\Windows\Fonts\\times.ttf', 20)
+            font = pygame.font.Font('klavika-light.ttf', 20)
             buttons_list = ['', ' MANAGE TASKS ', ' VIEW SCHEDULE ', ''] # List of buttons. The empty strings at the start and end maintain spacing. The spaces at he begining and end of each word are for the same reason
             y = 2 * (250/len(buttons_list))
             biggest_width = 0 # Will hold the width of the widest button to maintain spacing with other objects.
