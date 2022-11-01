@@ -1,18 +1,10 @@
 {
     "Task_1": {
         "title": "Hello World",
-        "description": "A simple task to test the program.",
+        "description": "A simple app for the 2022 CAC",
         "priority": "Medium",
-        "date": "09/21/22",
-        "time to start": "09:00 AM",
+        "date": "11/01/22",
+        "time to start": "12:00 PM",
         "time to complete": "1"
-    },
-    "Task_2": {
-        "title": "App",
-        "description": "Look at the App - remember to give feedback!",
-        "priority": "Low",
-        "date": "10/31/22",
-        "time to start": "12:59 PM",
-        "time to complete": "43200"
     }
 }
