@@ -16,7 +16,7 @@ The schedule screen is where the user can view their schedule. Head In The Game 
 ### Home Screen
 The home screen has three main sections: the calendar, the tasks, and the schedule.
 
-The calendar is a calendar of the current month. The tasks section shows the oldest tasks so the user knows what tasks they have been delaying or putting off. The schedule section shows the next few tasks on the schedule so the user knows what tasks they have to complete next.
+The calendar is a calendar of the current month. The tasks section shows the oldest tasks so the user knows what tasks they have been delaying or putting off. The schedule section shows the next few tasks on the schedule so the user knows what tasks they have to complete next. The date and time are also shown in the top left corner.
 
 ### Notifications
 While it doesn't have a dedicated screen, the notifications are the biggest feature of our app. Head In The Game notifies the user when it is time for them to complete a task. This helps the user stay focused and stop procrastination. At the start of the program, Head In The Game will also send one notification reminding the user what tasks are overdue. This keeps the user from putting off tasks that they don't want to do.
