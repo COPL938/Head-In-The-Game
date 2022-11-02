@@ -3,8 +3,8 @@ Head in the game is an app created for the 2022 [Congressional App Challenge](ht
 Our goal in creating this app was to create an app that helps kids - especially those with conditions such as ADHD - better manage their schedule and learn the valuable life lesson of time management.
 # Using Head In The Game
 
-### Taks Screen
-The tasks sreen is where the user can manage all of their tasks. 
+### Tasks Screen
+The tasks screen is where the user can manage all of their tasks. 
 
 To add a task the user needs to click on the "Add Task" button. Text boxes then appear which prompt the user to enter the necesary info for each task - a title, a brief description, the priority for the task, the date the task needs to be done, the time it needs to be done, and the amount of time necesary to complete the task. When the user hits the "Done" button, the task is automatically saved to the JSON file and the user is taken back to the tasks screen.
 
